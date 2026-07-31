@@ -19,10 +19,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -193,6 +195,97 @@ fun AdminScreen(
                         Prefs.setShortcutEnabled(context, sc.id, it)
                     }
                 )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Section Réglages rapides
+        SectionTitle("Réglages rapides")
+
+        AdminButton("Réglages Wi-Fi") {
+            context.startActivity(Intent(Settings.ACTION_WIFI_SETTINGS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            })
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        AdminButton("Réglages données mobiles") {
+            context.startActivity(Intent(Settings.ACTION_DATA_USAGE_SETTINGS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            })
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        AdminButton("Réglages Bluetooth") {
+            context.startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            })
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        AdminButton("Réglages affichage") {
+            context.startActivity(Intent(Settings.ACTION_DISPLAY_SETTINGS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            })
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        AdminButton("Réglages son") {
+            context.startActivity(Intent(Settings.ACTION_SOUND_SETTINGS).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            })
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Slider de luminosité
+        Text(
+            text = "Luminosité",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        var brightness by remember {
+            mutableFloatStateOf(
+                try {
+                    Settings.System.getInt(
+                        context.contentResolver,
+                        Settings.System.SCREEN_BRIGHTNESS
+                    ).toFloat()
+                } catch (e: Exception) {
+                    128f
+                }
+            )
+        }
+        Slider(
+            value = brightness,
+            onValueChange = { brightness = it },
+            valueRange = 0f..255f,
+            onValueChangeFinished = {
+                if (Settings.System.canWrite(context)) {
+                    Settings.System.putInt(
+                        context.contentResolver,
+                        Settings.System.SCREEN_BRIGHTNESS,
+                        brightness.toInt()
+                    )
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = "Pour modifier la luminosité, autorisez d'abord l'écriture des réglages",
+            fontSize = 14.sp,
+            color = Color(0xFF666666)
+        )
+        if (!Settings.System.canWrite(context)) {
+            Spacer(modifier = Modifier.height(4.dp))
+            AdminButton("Autoriser la modification des réglages") {
+                context.startActivity(Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
+                    data = android.net.Uri.parse("package:${context.packageName}")
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                })
             }
         }
 

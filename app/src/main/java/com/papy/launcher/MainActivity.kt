@@ -302,6 +302,12 @@ fun ClockHeader(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
+            text = "Papy Launcher",
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Normal,
+            color = Color(0xFF888888)
+        )
+        Text(
             text = timeStr,
             fontSize = 48.sp,
             fontWeight = FontWeight.Bold,
