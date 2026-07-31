@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Papy Launcher</string>
+
+    <!-- Boutons de l'écran d'accueil -->
+    <string name="btn_appels">Appels</string>
+    <string name="btn_sms">SMS</string>
+    <string name="btn_mail">Mail</string>
+    <string name="btn_photos">Photos</string>
+    <string name="btn_whatsapp">WhatsApp</string>
+    <string name="btn_sos">SOS</string>
+    <string name="btn_applis">Applis</string>
+
+    <!-- Divers -->
+    <string name="sos_default_number">112</string>
+    <string name="admin_pin_hint">Code admin</string>
+    <string name="kiosk_service_description">Mode kiosque Papy Launcher - empêche de quitter le launcher par erreur. À activer dans les paramètres d\'accessibilité.</string>
+</resources>
