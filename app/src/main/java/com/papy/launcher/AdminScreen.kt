@@ -407,7 +407,7 @@ fun AdminScreen(
                 val cursor = try {
                     context.contentResolver.query(
                         uri,
-                        arrayOf(ContactsContract.Contacts.LOOKUP_KEY),
+                        arrayOf(ContactsContract.Contacts._ID),
                         null, null, null
                     )
                 } catch (e: Exception) {
@@ -415,13 +415,17 @@ fun AdminScreen(
                 }
                 cursor?.use {
                     if (it.moveToFirst()) {
-                        val lookupKey = it.getString(0)
-                        if (lookupKey != null) {
-                            if (Prefs.getFavorites(context).contains(lookupKey)) {
-                                Toast.makeText(context, "Déjà dans les favoris", Toast.LENGTH_SHORT).show()
-                            } else {
-                                Prefs.addFavorite(context, lookupKey)
-                                favorites.value = Prefs.getFavorites(context)
+                        val contactId = it.getLong(0)
+                        val lookupUri = ContactsContract.Contacts.getLookupUri(contactId, null)
+                        if (lookupUri != null) {
+                            val lookupKey = extractLookupKey(lookupUri)
+                            if (lookupKey != null) {
+                                if (Prefs.getFavorites(context).contains(lookupKey)) {
+                                    Toast.makeText(context, "Déjà dans les favoris", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Prefs.addFavorite(context, lookupKey)
+                                    favorites.value = Prefs.getFavorites(context)
+                                }
                             }
                         }
                     }
@@ -445,9 +449,10 @@ fun AdminScreen(
                 color = Color(0xFF666666)
             )
         } else {
-            for (lookupKey in favorites.value) {
-                val contact = remember(lookupKey) { getContactByLookupKey(context, lookupKey) }
-                if (contact == null) continue
+            val resolvedFavorites = remember(favorites.value) {
+                favorites.value.mapNotNull { getContactByLookupKey(context, it) }
+            }
+            for (contact in resolvedFavorites) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -513,7 +518,7 @@ fun AdminScreen(
                         fontWeight = FontWeight.Bold,
                         color = Color(0xFFC62828),
                         modifier = Modifier.clickable {
-                            Prefs.removeFavorite(context, lookupKey)
+                            Prefs.removeFavorite(context, contact.lookupKey)
                             favorites.value = Prefs.getFavorites(context)
                         }
                     )

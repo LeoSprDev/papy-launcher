@@ -40,6 +40,16 @@ fun getContactByLookupKey(context: Context, lookupKey: String): Contact? {
     return null
 }
 
+fun extractLookupKey(lookupUri: Uri): String? {
+    val path = lookupUri.path ?: return null
+    val marker = "/lookup/"
+    val idx = path.indexOf(marker)
+    if (idx < 0) return null
+    val afterMarker = path.substring(idx + marker.length)
+    val slashIdx = afterMarker.indexOf('/')
+    return if (slashIdx >= 0) afterMarker.substring(0, slashIdx) else afterMarker
+}
+
 private fun getPhoneNumber(context: Context, contactId: Long): String? {
     val cursor = try {
         context.contentResolver.query(
