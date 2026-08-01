@@ -1,0 +1,199 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-01T00:00:00Z",
+  "title": "Design System: Papy Launcher",
+  "extensions": {
+    "colorMeta": {
+      "indigo-mecanique": {
+        "role": "primary",
+        "displayName": "Indigo Mécanique",
+        "canonical": "#1A237E",
+        "tonalRamp": ["#0A0F4E", "#10154F", "#161A57", "#1A237E", "#2E3FA8", "#5C6BC0", "#9FA8DA", "#C5CAE9"]
+      },
+      "rouge-sos-familial": {
+        "role": "secondary",
+        "displayName": "Rouge SOS Familial",
+        "canonical": "#C62828",
+        "tonalRamp": ["#4E0A0A", "#7A1212", "#A01A1A", "#C62828", "#E53935", "#EF9A9A", "#FFCDD2", "#FFEBEE"]
+      },
+      "vert-appel": {
+        "role": "tertiary",
+        "displayName": "Vert Appel",
+        "canonical": "#2E7D32",
+        "tonalRamp": ["#0A2E0A", "#1B3D1B", "#2E7D32", "#4CAF50", "#66BB6A", "#81C784", "#A5D6A7", "#C8E6C9"]
+      },
+      "bleu-message": {
+        "role": "tertiary",
+        "displayName": "Bleu Message",
+        "canonical": "#1565C0",
+        "tonalRamp": ["#0A1E4E", "#0D47A1", "#1565C0", "#1976D2", "#42A5F5", "#64B5F6", "#90CAF9", "#BBDEFB"]
+      },
+      "vert-whatsapp": {
+        "role": "tertiary",
+        "displayName": "Vert WhatsApp",
+        "canonical": "#075E54",
+        "tonalRamp": ["#022E2A", "#044039", "#075E54", "#128C7E", "#25D366", "#4DCC80", "#80E09A", "#B5EBBB"]
+      },
+      "orange-courrier": {
+        "role": "tertiary",
+        "displayName": "Orange Courrier",
+        "canonical": "#EF6C00",
+        "tonalRamp": ["#4E2A00", "#7A4200", "#BF4D00", "#EF6C00", "#FB8C00", "#FFA726", "#FFB74D", "#FFE0B2"]
+      },
+      "violet-album": {
+        "role": "tertiary",
+        "displayName": "Violet Album",
+        "canonical": "#6A1B9A",
+        "tonalRamp": ["#2E0A4E", "#4A148C", "#6A1B9A", "#8E24AA", "#AB47BC", "#BA68C8", "#CE93D8", "#E1BEE7"]
+      },
+      "gris-reglages": {
+        "role": "tertiary",
+        "displayName": "Gris Réglages",
+        "canonical": "#455A64",
+        "tonalRamp": ["#1A2A30", "#263238", "#37474F", "#455A64", "#607D8B", "#78909C", "#B0BEC5", "#ECEFF1"]
+      },
+      "teal-camera": {
+        "role": "tertiary",
+        "displayName": "Teal Caméra",
+        "canonical": "#00695C",
+        "tonalRamp": ["#002E28", "#004D40", "#00695C", "#00796B", "#26A69A", "#4DB6AC", "#80CBC4", "#B2DFDB"]
+      },
+      "violet-prout": {
+        "role": "tertiary",
+        "displayName": "Violet Prout",
+        "canonical": "#8E63BC",
+        "tonalRamp": ["#3A1A5C", "#5E2A8C", "#7244AC", "#8E63BC", "#A57AD0", "#BA8EE0", "#D0A8EC", "#E6C8F5"]
+      },
+      "texte-principal": { "role": "neutral", "displayName": "Texte Principal", "canonical": "#333333", "tonalRamp": ["#000000", "#1A1A1A", "#262626", "#333333", "#555555", "#777777", "#AAAAAA", "#DDDDDD"] },
+      "texte-secondaire": { "role": "neutral", "displayName": "Texte Secondaire", "canonical": "#555555", "tonalRamp": ["#000000", "#1A1A1A", "#333333", "#555555", "#777777", "#999999", "#BBBBBB", "#DDDDDD"] },
+      "texte-aide": { "role": "neutral", "displayName": "Texte Aide", "canonical": "#666666", "tonalRamp": ["#000000", "#222222", "#444444", "#666666", "#888888", "#AAAAAA", "#CCCCCC", "#EEEEEE"] },
+      "texte-legende": { "role": "neutral", "displayName": "Texte Légende", "canonical": "#888888", "tonalRamp": ["#000000", "#222222", "#444444", "#666666", "#888888", "#AAAAAA", "#CCCCCC", "#EEEEEE"] },
+      "contour-clair": { "role": "neutral", "displayName": "Contour Clair", "canonical": "#CCCCCC", "tonalRamp": ["#333333", "#555555", "#777777", "#999999", "#BBBBBB", "#CCCCCC", "#DDDDDD", "#EEEEEE"] },
+      "surface-pale": { "role": "neutral", "displayName": "Surface Pale", "canonical": "#EEEEEE", "tonalRamp": ["#333333", "#555555", "#777777", "#999999", "#BBBBBB", "#DDDDDD", "#EEEEEE", "#F5F5F5"] },
+      "surface-card": { "role": "neutral", "displayName": "Surface Card", "canonical": "#F5F5F5", "tonalRamp": ["#333333", "#555555", "#777777", "#999999", "#BBBBBB", "#DDDDDD", "#EEEEEE", "#F5F5F5"] },
+      "blanc": { "role": "neutral", "displayName": "Blanc", "canonical": "#FFFFFF", "tonalRamp": ["#333333", "#555555", "#777777", "#999999", "#CCCCCC", "#EEEEEE", "#F5F5F5", "#FFFFFF"] },
+      "noir": { "role": "neutral", "displayName": "Noir", "canonical": "#000000", "tonalRamp": ["#000000", "#1A1A1A", "#333333", "#555555", "#777777", "#AAAAAA", "#DDDDDD", "#FFFFFF"] }
+    },
+    "typographyMeta": {
+      "horloge": { "displayName": "Horloge", "purpose": "Heure en haut de l'écran d'accueil. La plus grande typo de l'app." },
+      "titre-ecran": { "displayName": "Titre Écran", "purpose": "Titres d'écrans admin." },
+      "titre-section": { "displayName": "Titre Section", "purpose": "Titres de sections dans l'admin." },
+      "bouton-tuile": { "displayName": "Bouton Tuile", "purpose": "Labels des raccourcis sur l'écran d'accueil." },
+      "bouton-sos": { "displayName": "Bouton SOS", "purpose": "Label du bouton SOS, plus grand que les tuiles." },
+      "bouton-admin": { "displayName": "Bouton Admin", "purpose": "Boutons d'action admin." },
+      "pave-pin": { "displayName": "Pavé PIN", "purpose": "Chiffres du pavé numérique admin." },
+      "libelle-tuile": { "displayName": "Libellé Tuile", "purpose": "Titres secondaires de liste, label PIN." },
+      "corps": { "displayName": "Corps", "purpose": "Libellés de réglages, noms d'applis." },
+      "secondaire": { "displayName": "Secondaire", "purpose": "Descriptions, notes d'aide." },
+      "badge": { "displayName": "Badge", "purpose": "Compteurs dans les pastilles rouges. Minimum absolu." }
+    },
+    "shadows": [],
+    "motion": [
+      { "name": "none", "value": "instant", "purpose": "Aucun mouvement décoratif. Transitions d'état instantanées par défaut. Le tactile pur ne s'explique pas, il se fait." }
+    ],
+    "breakpoints": [
+      { "name": "phone-portrait", "value": "portrait only", "purpose": "Orientation verrouillée. Pas de layout paysage." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Tuile Raccourci",
+      "kind": "custom",
+      "refersTo": "tuile-raccourci",
+      "description": "Gros bouton coloré de l'écran d'accueil. Couleur fonctionnelle pleine, texte blanc gras, badge optionnel.",
+      "html": "<div class=\"ds-tuile-raccourci\"><span class=\"ds-tuile-label\">Appels</span><span class=\"ds-badge\">3</span></div>",
+      "css": ".ds-tuile-raccourci { background: #2E7D32; color: #FFFFFF; border-radius: 24px; aspect-ratio: 1.6; width: 100%; display: flex; align-items: center; justify-content: center; position: relative; font-family: Roboto, sans-serif; font-weight: 700; font-size: 26px; padding: 4px; } .ds-badge { position: absolute; top: 8px; right: 8px; width: 32px; height: 32px; border-radius: 50%; background: #C62828; color: #FFFFFF; border: 2px solid #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }"
+    },
+    {
+      "name": "Tuile SOS",
+      "kind": "custom",
+      "refersTo": "tuile-sos",
+      "description": "Bouton SOS pleine largeur, rouge, texte 36sp. Plus grand que les tuiles raccourcis.",
+      "html": "<div class=\"ds-tuile-sos\">SOS</div>",
+      "css": ".ds-tuile-sos { background: #C62828; color: #FFFFFF; border-radius: 24px; width: 100%; height: 100px; display: flex; align-items: center; justify-content: center; font-family: Roboto, sans-serif; font-weight: 700; font-size: 36px; padding: 4px; }"
+    },
+    {
+      "name": "Bouton Admin",
+      "kind": "button",
+      "refersTo": "bouton-admin",
+      "description": "Bande indigo pleine, hauteur 56dp, texte blanc 20sp. Actions de l'écran admin et boutons Retour.",
+      "html": "<button class=\"ds-bouton-admin\">Enregistrer le code</button>",
+      "css": ".ds-bouton-admin { background: #1A237E; color: #FFFFFF; border: none; border-radius: 16px; width: 100%; height: 56px; display: flex; align-items: center; justify-content: center; font-family: Roboto, sans-serif; font-weight: 700; font-size: 20px; padding: 0 16px; cursor: pointer; } .ds-bouton-admin:hover { background: #2E3FA8; }"
+    },
+    {
+      "name": "Touche PIN",
+      "kind": "custom",
+      "refersTo": "touche-pin",
+      "description": "Cercle 80dp du pavé numérique admin. Indigo pour chiffre, gris clair pour action (C/X).",
+      "html": "<div class=\"ds-touche-pin\">5</div>",
+      "css": ".ds-touche-pin { background: #1A237E; color: #FFFFFF; border-radius: 50%; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; font-family: Roboto, sans-serif; font-weight: 700; font-size: 32px; cursor: pointer; } .ds-touche-pin.action { background: #EEEEEE; color: #C62828; }"
+    },
+    {
+      "name": "Rangée Appli",
+      "kind": "card",
+      "refersTo": "rangee-appli",
+      "description": "Carte gris clair d'une appli dans la liste. Icône 48dp + nom 20sp.",
+      "html": "<div class=\"ds-rangee-appli\"><div class=\"ds-app-icon\"></div><span class=\"ds-app-name\">WhatsApp</span></div>",
+      "css": ".ds-rangee-appli { background: #F5F5F5; border-radius: 16px; width: 100%; padding: 12px; display: flex; align-items: center; gap: 16px; cursor: pointer; } .ds-app-icon { width: 48px; height: 48px; background: #CCCCCC; border-radius: 8px; flex-shrink: 0; } .ds-app-name { color: #333333; font-family: Roboto, sans-serif; font-weight: 500; font-size: 20px; }"
+    },
+    {
+      "name": "Badge Pastille",
+      "kind": "custom",
+      "refersTo": "badge",
+      "description": "Cercle rouge 32dp avec compteur blanc. Position TopEnd sur tuile. Bordure blanche 2dp.",
+      "html": "<div class=\"ds-badge-standalone\">12</div>",
+      "css": ".ds-badge-standalone { width: 32px; height: 32px; border-radius: 50%; background: #C62828; color: #FFFFFF; border: 2px solid #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: Roboto, sans-serif; font-weight: 700; font-size: 14px; }"
+    },
+    {
+      "name": "Header Horloge",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "Horloge de l'écran d'accueil. Légende au-dessus, heure 48sp indigo, date 22sp foncé. Long appui = trigger admin.",
+      "html": "<div class=\"ds-horloge\"><span class=\"ds-legende\">Papy Launcher</span><span class=\"ds-heure\">14:32</span><span class=\"ds-date\">Vendredi 1 août</span></div>",
+      "css": ".ds-horloge { display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: Roboto, sans-serif; } .ds-legende { color: #888888; font-size: 18px; font-weight: 400; } .ds-heure { color: #1A237E; font-size: 48px; font-weight: 700; line-height: 1.1; } .ds-date { color: #333333; font-size: 22px; font-weight: 400; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "La Porte Couleur",
+    "overview": "Chaque bouton est une porte peinte d'une couleur qu'on reconnaît. La navigation devient mémoire spatiale, pas lecture de texte : papa sait que « la verte » c'est les appels, « la rouge en bas » c'est le secours, sans avoir à déchiffrer un label. La couleur est l'identifiant, le texte est la confirmation.\n\nLe système est un ensemble de tuiles domestiques : objets du quotidien peints en couleurs pleines, formes simples, robustesse tactile. Le blanc dominant est la pièce claire où les tuiles sont posées ; les couleurs profondes (pas de primaires criards) distinguent chaque fonction sans alarmer. Les coins sont arrondis doux (24dp sur les tuiles), les surfaces sont mates et pleines, il n'y a ni ombre, ni dégradé, ni mouvement décoratif.\n\nLa lisibilité sert la reconnaissance immédiate : 48sp pour l'horloge, 36sp pour le SOS, 26sp sur les tuiles, rien en dessous de 14sp. Le thème clair est forcé par construction — le senior ne bascule jamais en mode sombre illisible.",
+    "keyCharacteristics": [
+      "Tuiles pleines, coins 24dp, surface mate, aucune ombre.",
+      "Couleurs fonctionnelles profondes (jamais de primaires criards), blanc dominant.",
+      "Texte blanc gras sur tuiles colorées ; texte foncé (#333333) sur surfaces claires.",
+      "Thème clair forcé — le mode sombre est un non-sens produit, pas un défaut.",
+      "Tailles de texte élevées (14sp minimum, 48sp pour l'horloge) ; pas de hiérarchie fine, des sauts nets.",
+      "Toutes les tailles en sp, tous les espacements en dp (suivre le réglage de police système).",
+      "Indigo Mécanique = couleur de l'admin ; Rouge SOS Familial = seule couleur d'alerte.",
+      "Pas d'effet au survol (tactile pur) ; pas de mouvement décoratif."
+    ],
+    "rules": [
+      { "name": "The One Alert Rule", "body": "Le Rouge SOS Familial est la seule couleur d'alerte autorisée. Il apparaît sur le bouton SOS, les pastilles de notification, les messages d'erreur et la touche d'effacement. Aucune autre touche de rouge.", "section": "colors" },
+      { "name": "The Aidant Color Rule", "body": "L'Indigo Mécanique est réservé à l'admin et à la navigation de retour. Il n'apparaît jamais sur l'écran d'accueil senior. La séparation des couleurs reflète la séparation des rôles.", "section": "colors" },
+      { "name": "The Full Tile Rule", "body": "Les couleurs de raccourcis remplissent toute la tuile ; le texte est blanc gras par-dessus. Jamais de tuile blanche avec bordure colorée. La couleur est l'identifiant.", "section": "colors" },
+      { "name": "The Size Jump Rule", "body": "Pas de hiérarchie fine. Les tailles sautent par paliers nets (14 → 20 → 22 → 26 → 32 → 36 → 48). Un senior ne distingue pas 16sp de 18sp ; il distingue 20 de 26.", "section": "typography" },
+      { "name": "The White-On-Color Rule", "body": "Tout texte sur tuile colorée est blanc gras. Tout texte sur surface claire est foncé (#333333). Jamais de texte coloré sur couleur, jamais de texte clair sur blanc.", "section": "typography" },
+      { "name": "The Flat-By-Design Rule", "body": "Pas d'ombre. Pas d'elevation. Pas de tonal elevation Material. La hiérarchie visuelle est portée par la couleur et la taille, jamais par la profondeur.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do verrouiller le portrait — le paysage casse la grille et n'a pas de sens pour un senior.",
+      "Do forcer le thème clair — la lisibilité senior est non-négociable.",
+      "Do utiliser des tailles en sp et des espacements en dp pour suivre le réglage de police système.",
+      "Do remplir toute la tuile avec la couleur fonctionnelle ; texte blanc gras par-dessus.",
+      "Do garder l'Indigo Mécanique pour l'admin et le Rouge SOS Familial pour l'alerte.",
+      "Do sauter par paliers nets de taille de texte (14 → 20 → 22 → 26 → 32 → 36 → 48).",
+      "Do viser des cibles tactiles ≥ 48dp.",
+      "Do faire défiler l'écran admin verticalement."
+    ],
+    "donts": [
+      "Don't ajouter d'ombres, d'élévation ou de dégradés. Le système est plat par construction.",
+      "Don't utiliser des primaires criards (#F44336, #2196F3) — les couleurs sont profondes pour la lisibilité sans alarme.",
+      "Don't mettre du texte coloré sur une tuile colorée, ni du texte clair sur fond blanc.",
+      "Don't ajouter des effets au survol, des animations décoratives ou des transitions complexes.",
+      "Don't utiliser l'Indigo Mécanique sur l'écran d'accueil senior — c'est la couleur de l'aidant.",
+      "Don't utiliser une autre couleur que le Rouge SOS Familial pour alerter.",
+      "Don't faire des tuiles blanches avec bordure colorée. La couleur est l'identifiant.",
+      "Don't descendre en dessous de 14sp pour du texte lisible.",
+      "Don't ajouter un mode sombre. C'est un non-sens produit, pas un défaut manquant."
+    ]
+  }
+}

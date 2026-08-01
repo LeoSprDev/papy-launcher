@@ -70,7 +70,7 @@ class HomeButtonService : Service() {
 
         val button = Button(this).apply {
             text = "Accueil"
-            textSize = 16f
+            textSize = 22f
             setOnClickListener {
                 val homeIntent = Intent(Intent.ACTION_MAIN).apply {
                     addCategory(Intent.CATEGORY_HOME)
@@ -93,8 +93,9 @@ class HomeButtonService : Service() {
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT
         ).apply {
-            gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-            y = 80
+            gravity = Gravity.CENTER_VERTICAL or Gravity.END
+            x = 16
+            y = 0
         }
 
         try {

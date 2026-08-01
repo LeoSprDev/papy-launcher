@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -80,74 +81,77 @@ fun PhotosScreen(
     val context = LocalContext.current
     var photos by remember { mutableStateOf<List<Photo>>(emptyList()) }
     var selectedPhoto by remember { mutableStateOf<Photo?>(null) }
+    val gridState = rememberLazyGridState()
 
     LaunchedEffect(Unit) {
         photos = loadPhotos(context)
     }
 
-    if (selectedPhoto != null) {
-        FullscreenPhoto(
-            photo = selectedPhoto!!,
-            onClose = { selectedPhoto = null }
-        )
-        return
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF1A237E))
-                    .clickable { onBack() }
-                    .padding(horizontal = 24.dp, vertical = 16.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFF1A237E))
+                        .clickable { onBack() }
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
+                ) {
+                    Text(
+                        text = "Retour",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = "Retour",
-                    fontSize = 22.sp,
+                    text = "Photos",
+                    fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = Color(0xFF1A237E)
                 )
             }
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = "Photos",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A237E)
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-        if (photos.isEmpty()) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Aucune photo trouvée",
-                    fontSize = 22.sp,
-                    color = Color(0xFF666666)
-                )
-            }
-        } else {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                items(photos) { photo ->
-                    PhotoThumb(photo = photo) { selectedPhoto = photo }
+            if (photos.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Aucune photo trouvée",
+                        fontSize = 22.sp,
+                        color = Color(0xFF666666)
+                    )
+                }
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(3),
+                    state = gridState,
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    items(photos) { photo ->
+                        PhotoThumb(photo = photo) { selectedPhoto = photo }
+                    }
                 }
             }
+        }
+
+        selectedPhoto?.let { photo ->
+            FullscreenPhoto(
+                photo = photo,
+                onClose = { selectedPhoto = null }
+            )
         }
     }
 }

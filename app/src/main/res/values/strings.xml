@@ -9,6 +9,8 @@
     <string name="btn_whatsapp">WhatsApp</string>
     <string name="btn_sos">SOS</string>
     <string name="btn_applis">Applis</string>
+    <string name="btn_appareil_photo">Appareil photo</string>
+    <string name="btn_prout">Prout</string>
 
     <!-- Divers -->
     <string name="sos_default_number">112</string>

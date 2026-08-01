@@ -1,7 +1,16 @@
 package com.papy.launcher
 
+import android.Manifest
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.provider.Settings
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,8 +25,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
@@ -37,6 +50,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 
 @Composable
 fun AdminScreen(
@@ -47,6 +61,33 @@ fun AdminScreen(
     var sosVisible by remember { mutableStateOf(Prefs.isSosVisible(context)) }
     var newPin by remember { mutableStateOf("") }
     var kioskEnabled by remember { mutableStateOf(Prefs.isKioskEnabled(context)) }
+
+    // États des autorisations/permissions — lus à l'affichage et après retour Settings
+    var notifListenerEnabled by remember { mutableStateOf(isNotifListenerEnabled(context)) }
+    var overlayEnabled by remember { mutableStateOf(Settings.canDrawOverlays(context)) }
+    var kioskRunning by remember { mutableStateOf(PapyKioskService.isRunning(context)) }
+    var writeSettingsEnabled by remember { mutableStateOf(Settings.System.canWrite(context)) }
+    var callPhoneGranted by remember { mutableStateOf(isGranted(context, Manifest.permission.CALL_PHONE)) }
+    var callLogGranted by remember { mutableStateOf(isGranted(context, Manifest.permission.READ_CALL_LOG)) }
+    var photosGranted by remember { mutableStateOf(isPhotosPermissionGranted(context)) }
+
+    // Re-vérifie les états quand l'admin revient au premier plan (après un Intent Settings)
+    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    val lifecycleObserver = androidx.lifecycle.LifecycleEventObserver { _, event ->
+        if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+            notifListenerEnabled = isNotifListenerEnabled(context)
+            overlayEnabled = Settings.canDrawOverlays(context)
+            kioskRunning = PapyKioskService.isRunning(context)
+            writeSettingsEnabled = Settings.System.canWrite(context)
+            callPhoneGranted = isGranted(context, Manifest.permission.CALL_PHONE)
+            callLogGranted = isGranted(context, Manifest.permission.READ_CALL_LOG)
+            photosGranted = isPhotosPermissionGranted(context)
+        }
+    }
+    androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(lifecycleObserver) }
+    }
 
     Column(
         modifier = Modifier
@@ -138,6 +179,11 @@ fun AdminScreen(
                 onCheckedChange = {
                     if (it) {
                         if (!PapyKioskService.isRunning(context)) {
+                            Toast.makeText(
+                                context,
+                                "Trouvez Papy Launcher dans la liste et activez-le",
+                                Toast.LENGTH_LONG
+                            ).show()
                             context.startActivity(
                                 Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
                                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -162,6 +208,15 @@ fun AdminScreen(
             color = Color(0xFF666666),
             modifier = Modifier.padding(top = 8.dp)
         )
+        if (kioskEnabled && !kioskRunning) {
+            Text(
+                text = "⚠ À activer dans les paramètres d'accessibilité (Papy Launcher n'est pas encore actif)",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFFC62828),
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
 
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -197,6 +252,134 @@ fun AdminScreen(
                 )
             }
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Section Autorisations système (à activer manuellement une fois)
+        SectionTitle("Autorisations système")
+
+        AdminLinkButton(
+            label = "Accès aux notifications",
+            active = notifListenerEnabled,
+            hint = "Pastilles SMS, mail, WhatsApp"
+        ) {
+            Toast.makeText(
+                context,
+                "Trouvez Papy Launcher dans la liste et activez-le",
+                Toast.LENGTH_LONG
+            ).show()
+            context.startActivity(
+                Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        AdminLinkButton(
+            label = "Affichage au-dessus des autres applis",
+            active = overlayEnabled,
+            hint = "Bouton Accueil flottant"
+        ) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                context.startActivity(
+                    Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
+                        data = Uri.parse("package:${context.packageName}")
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        AdminLinkButton(
+            label = "Service d'accessibilité (kiosque)",
+            active = kioskRunning,
+            hint = "Empêche de quitter le launcher"
+        ) {
+            Toast.makeText(
+                context,
+                "Trouvez Papy Launcher dans la liste et activez-le",
+                Toast.LENGTH_LONG
+            ).show()
+            context.startActivity(
+                Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        AdminLinkButton(
+            label = "Modification des réglages",
+            active = writeSettingsEnabled,
+            hint = "Slider luminosité"
+        ) {
+            context.startActivity(
+                Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
+                    data = Uri.parse("package:${context.packageName}")
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            AdminLinkButton(
+                label = "Launcher par défaut",
+                active = isDefaultLauncher(context),
+                hint = "Papy Launcher s'ouvre au bouton Home"
+            ) {
+                try {
+                    context.startActivity(
+                        Intent(Settings.ACTION_HOME_SETTINGS).apply {
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        }
+                    )
+                } catch (e: Exception) {
+                    Toast.makeText(
+                        context,
+                        "Appuyez sur le bouton Home et choisissez Papy Launcher",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Section Permissions appli (boîte système / page d'infos)
+        SectionTitle("Permissions de l'application")
+
+        PermissionButton(
+            label = "Appels téléphoniques (SOS)",
+            granted = callPhoneGranted,
+            permission = Manifest.permission.CALL_PHONE,
+            context = context,
+            onResult = { callPhoneGranted = it }
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        PermissionButton(
+            label = "Journal d'appels (appels manqués)",
+            granted = callLogGranted,
+            permission = Manifest.permission.READ_CALL_LOG,
+            context = context,
+            onResult = { callLogGranted = it }
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        PermissionButton(
+            label = "Photos (visionneur)",
+            granted = photosGranted,
+            permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                Manifest.permission.READ_MEDIA_IMAGES
+            else
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+            context = context,
+            onResult = { photosGranted = it }
+        )
 
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -275,19 +458,10 @@ fun AdminScreen(
             modifier = Modifier.fillMaxWidth()
         )
         Text(
-            text = "Pour modifier la luminosité, autorisez d'abord l'écriture des réglages",
+            text = "Pour modifier la luminosité, activez « Modification des réglages » dans la section Autorisations",
             fontSize = 14.sp,
             color = Color(0xFF666666)
         )
-        if (!Settings.System.canWrite(context)) {
-            Spacer(modifier = Modifier.height(4.dp))
-            AdminButton("Autoriser la modification des réglages") {
-                context.startActivity(Intent(Settings.ACTION_MANAGE_WRITE_SETTINGS).apply {
-                    data = android.net.Uri.parse("package:${context.packageName}")
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                })
-            }
-        }
 
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -333,4 +507,188 @@ fun AdminButton(
             color = Color.White
         )
     }
+}
+
+@Composable
+fun AdminLinkButton(
+    label: String,
+    active: Boolean,
+    hint: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(if (active) Color(0xFF1A237E) else Color(0xFF1A237E))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(24.dp)
+                .clip(CircleShape)
+                .background(if (active) Color(0xFF2E7D32) else Color(0xFFCCCCCC)),
+            contentAlignment = Alignment.Center
+        ) {
+            if (active) {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Text(
+                text = hint,
+                fontSize = 14.sp,
+                color = Color(0xFFCCCCCC)
+            )
+        }
+        Text(
+            text = if (active) "Activé" else "À activer",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = if (active) Color(0xFF81C784) else Color(0xFFFFCDD2)
+        )
+    }
+}
+
+@Composable
+fun PermissionButton(
+    label: String,
+    granted: Boolean,
+    permission: String,
+    context: Context,
+    onResult: (Boolean) -> Unit
+) {
+    val activity = context as? Activity
+    val activityResult = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { g ->
+        onResult(g)
+        if (g) Toast.makeText(context, "Permission accordée", Toast.LENGTH_SHORT).show()
+        else Toast.makeText(context, "Permission refusée — ouvrez les réglages de l'app", Toast.LENGTH_LONG).show()
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(0xFF1A237E))
+            .clickable {
+                if (granted) {
+                    Toast.makeText(
+                        context,
+                        "Onglet « Permissions » → désactivez « $label »",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.parse("package:${context.packageName}")
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
+                    context.startActivity(intent)
+                } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                    Toast.makeText(
+                        context,
+                        "Onglet « Permissions » → activez « $label »",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = Uri.parse("package:${context.packageName}")
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
+                    context.startActivity(intent)
+                } else {
+                    val canRequest = activity?.let {
+                        !it.shouldShowRequestPermissionRationale(permission)
+                    } != false
+                    if (canRequest) {
+                        activityResult.launch(permission)
+                    } else {
+                        Toast.makeText(
+                            context,
+                            "Onglet « Permissions » → activez « $label »",
+                            Toast.LENGTH_LONG
+                        ).show()
+                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = Uri.parse("package:${context.packageName}")
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        }
+                        context.startActivity(intent)
+                    }
+                }
+            }
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(24.dp)
+                .clip(CircleShape)
+                .background(if (granted) Color(0xFF2E7D32) else Color(0xFFCCCCCC)),
+            contentAlignment = Alignment.Center
+        ) {
+            if (granted) {
+                Icon(
+                    imageVector = Icons.Filled.Check,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = label,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = Color.White,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = if (granted) "Accordée" else "À accorder",
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold,
+            color = if (granted) Color(0xFF81C784) else Color(0xFFFFCDD2)
+        )
+    }
+}
+
+private fun isGranted(context: Context, permission: String): Boolean =
+    ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
+
+private fun isPhotosPermissionGranted(context: Context): Boolean =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+        isGranted(context, Manifest.permission.READ_MEDIA_IMAGES)
+    else
+        isGranted(context, Manifest.permission.READ_EXTERNAL_STORAGE)
+
+private fun isNotifListenerEnabled(context: Context): Boolean {
+    val flat = Settings.Secure.getString(
+        context.contentResolver,
+        "enabled_notification_listeners"
+    ) ?: return false
+    return flat.split(":").any { it.startsWith(context.packageName + "/") }
+}
+
+private fun isDefaultLauncher(context: Context): Boolean {
+    val roleHeld = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val roleManager = context.getSystemService(Context.ROLE_SERVICE) as? android.app.role.RoleManager
+        roleManager?.isRoleHeld(android.app.role.RoleManager.ROLE_HOME) == true
+    } else false
+    if (roleHeld) return true
+    val homeIntent = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_HOME)
+    val resolvers = context.packageManager.queryIntentActivities(homeIntent, 0)
+    if (resolvers.size != 1) return false
+    return resolvers[0].activityInfo.packageName == context.packageName
 }

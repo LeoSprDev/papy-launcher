@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.provider.Settings
 import android.view.WindowManager
 import android.widget.Toast
@@ -37,6 +38,15 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Photo
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.SentimentVerySatisfied
+import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -225,12 +235,23 @@ fun HomeScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
+        var tapCount by remember { mutableStateOf(0) }
+        var lastTapTime by remember { mutableStateOf(0L) }
         ClockHeader(
             modifier = Modifier
                 .padding(top = 8.dp, bottom = 8.dp)
                 .combinedClickable(
-                    onClick = {},
-                    onLongClick = { onAdminTrigger() }
+                    onClick = {
+                        val now = System.currentTimeMillis()
+                        if (now - lastTapTime > 2000L) tapCount = 0
+                        lastTapTime = now
+                        tapCount++
+                        if (tapCount >= 7) {
+                            tapCount = 0
+                            onAdminTrigger()
+                        }
+                    },
+                    onLongClick = {}
                 )
         )
 
@@ -257,10 +278,13 @@ fun HomeScreen(
                         ShortcutId.MAIL -> { ctx -> launchMailApp(ctx) }
                         ShortcutId.PHOTOS -> { ctx -> onPhotos() }
                         ShortcutId.APPLIS -> { ctx -> onApplis() }
+                        ShortcutId.APPAREIL_PHOTO -> { ctx -> launchCamera(ctx) }
+                        ShortcutId.PROUT -> { ctx -> playFartSound(ctx) }
                     }
                     BigButton(
                         label = stringResource(sc.labelRes),
                         color = sc.color,
+                        icon = shortcutIcon(sc.id),
                         badge = badge
                     ) { action(context) }
                     if (rowShortcuts.indexOf(sc) == 0 && rowShortcuts.size > 1) {
@@ -326,6 +350,7 @@ fun ClockHeader(modifier: Modifier = Modifier) {
 fun RowScope.BigButton(
     label: String,
     color: Color,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
     badge: Int = 0,
     onClick: () -> Unit
 ) {
@@ -338,14 +363,28 @@ fun RowScope.BigButton(
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = label,
-            fontSize = 26.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(4.dp)
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (icon != null) {
+                androidx.compose.material3.Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(40.dp)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+            }
+            Text(
+                text = label,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(4.dp)
+            )
+        }
         if (badge > 0) {
             Badge(
                 count = badge,
@@ -449,6 +488,17 @@ fun performCall(context: Context, number: String) {
     safeStartActivity(context, intent)
 }
 
+fun launchCamera(context: Context) {
+    val intent = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+        Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA)
+    } else {
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+    }.apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+    }
+    safeStartActivity(context, intent)
+}
+
 fun safeStartActivity(context: Context, intent: Intent) {
     try {
         context.startActivity(intent)
@@ -456,3 +506,16 @@ fun safeStartActivity(context: Context, intent: Intent) {
         Toast.makeText(context, "Aucune application trouvée", Toast.LENGTH_SHORT).show()
     }
 }
+
+@Composable
+fun shortcutIcon(id: ShortcutId): androidx.compose.ui.graphics.vector.ImageVector? =
+    when (id) {
+        ShortcutId.APPELS -> Icons.Filled.Phone
+        ShortcutId.SMS -> Icons.Filled.Sms
+        ShortcutId.WHATSAPP -> Icons.Filled.Chat
+        ShortcutId.MAIL -> Icons.Filled.Email
+        ShortcutId.PHOTOS -> Icons.Filled.Photo
+        ShortcutId.APPLIS -> Icons.Filled.Apps
+        ShortcutId.APPAREIL_PHOTO -> Icons.Filled.PhotoCamera
+        ShortcutId.PROUT -> Icons.Filled.SentimentVerySatisfied
+    }
