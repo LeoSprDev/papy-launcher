@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
+import android.provider.ContactsContract
 import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -45,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -380,6 +382,144 @@ fun AdminScreen(
             context = context,
             onResult = { photosGranted = it }
         )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        PermissionButton(
+            label = "Contacts (favoris)",
+            granted = isGranted(context, Manifest.permission.READ_CONTACTS),
+            permission = Manifest.permission.READ_CONTACTS,
+            context = context,
+            onResult = { }
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Section Favoris
+        SectionTitle("Favoris")
+
+        val favorites = remember { mutableStateOf(Prefs.getFavorites(context)) }
+        val pickContactLauncher = rememberLauncherForActivityResult(
+            ActivityResultContracts.PickContact()
+        ) { uri ->
+            if (uri != null) {
+                val cursor = try {
+                    context.contentResolver.query(
+                        uri,
+                        arrayOf(ContactsContract.Contacts.LOOKUP_KEY),
+                        null, null, null
+                    )
+                } catch (e: Exception) {
+                    null
+                }
+                cursor?.use {
+                    if (it.moveToFirst()) {
+                        val lookupKey = it.getString(0)
+                        if (lookupKey != null) {
+                            if (Prefs.getFavorites(context).contains(lookupKey)) {
+                                Toast.makeText(context, "Déjà dans les favoris", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Prefs.addFavorite(context, lookupKey)
+                                favorites.value = Prefs.getFavorites(context)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        val contactsGranted = isGranted(context, Manifest.permission.READ_CONTACTS)
+        AdminButton(
+            label = if (contactsGranted) "Ajouter un favori" else "Autoriser les contacts d'abord"
+        ) {
+            if (contactsGranted) {
+                pickContactLauncher.launch(null)
+            }
+        }
+        Spacer(modifier = Modifier.height(12.dp))
+
+        if (favorites.value.isEmpty()) {
+            Text(
+                text = "Aucun favori. Touchez « Ajouter un favori ».",
+                fontSize = 16.sp,
+                color = Color(0xFF666666)
+            )
+        } else {
+            for (lookupKey in favorites.value) {
+                val contact = remember(lookupKey) { getContactByLookupKey(context, lookupKey) }
+                if (contact == null) continue
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFFF5F5F5))
+                        .padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color(0xFFEEEEEE)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (contact.photoUri != null) {
+                            coil.compose.AsyncImage(
+                                model = contact.photoUri,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                            )
+                        } else {
+                            val initials = contact.displayName.split(" ")
+                                .mapNotNull { it.firstOrNull()?.uppercase() }
+                                .take(2)
+                                .joinToString("")
+                            Text(
+                                text = initials,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF333333)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = contact.displayName,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF333333)
+                        )
+                        if (!contact.phoneNumber.isNullOrEmpty()) {
+                            Text(
+                                text = contact.phoneNumber,
+                                fontSize = 16.sp,
+                                color = Color(0xFF666666)
+                            )
+                        } else {
+                            Text(
+                                text = "Aucun numéro",
+                                fontSize = 16.sp,
+                                color = Color(0xFF888888)
+                            )
+                        }
+                    }
+                    Text(
+                        text = "Retirer",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFC62828),
+                        modifier = Modifier.clickable {
+                            Prefs.removeFavorite(context, lookupKey)
+                            favorites.value = Prefs.getFavorites(context)
+                        }
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
 
         Spacer(modifier = Modifier.height(32.dp))
 
