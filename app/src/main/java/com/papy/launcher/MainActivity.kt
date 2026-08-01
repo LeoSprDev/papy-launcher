@@ -280,6 +280,7 @@ fun HomeScreen(
                         ShortcutId.APPLIS -> { ctx -> onApplis() }
                         ShortcutId.APPAREIL_PHOTO -> { ctx -> launchCamera(ctx) }
                         ShortcutId.PROUT -> { ctx -> playFartSound(ctx) }
+                        ShortcutId.FAVORIS -> { _ -> }
                     }
                     BigButton(
                         label = stringResource(sc.labelRes),
@@ -518,4 +519,5 @@ fun shortcutIcon(id: ShortcutId): androidx.compose.ui.graphics.vector.ImageVecto
         ShortcutId.APPLIS -> Icons.Filled.Apps
         ShortcutId.APPAREIL_PHOTO -> Icons.Filled.PhotoCamera
         ShortcutId.PROUT -> Icons.Filled.SentimentVerySatisfied
+        ShortcutId.FAVORIS -> null
     }

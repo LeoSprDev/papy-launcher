@@ -12,6 +12,7 @@ colors:
   gris-reglages: "#455A64"
   teal-camera: "#00695C"
   violet-prout: "#8E63BC"
+  indigo-favoris: "#3949AB"
   texte-principal: "#333333"
   texte-secondaire: "#555555"
   texte-aide: "#666666"
@@ -176,6 +177,7 @@ Palette de tuiles domestiques : six teintes fonctionnelles profondes pour les ra
 - **Gris Réglages** (#455A64) : bouton Applis. Gris ardoise.
 - **Teal Caméra** (#00695C) : bouton Appareil photo. Teal foncé, distinct du Vert WhatsApp (#075E54) et du Vert Appel (#2E7D32).
 - **Violet Prout** (#8E63BC) : bouton Prout. Violet plus clair que Violet Album (#6A1B9A), humoristique.
+- **Indigo Favoris** (#3949AB) : bouton Favoris. Indigo profond, plus clair que l'Indigo Mécanique (#1A237E) — distinct pour ne pas confondre avec l'admin, mais dans la même famille bleutée.
 
 ### Neutral
 - **Blanc** (#FFFFFF) : surface dominante. Fond de l'application, texte sur tuiles colorées.
