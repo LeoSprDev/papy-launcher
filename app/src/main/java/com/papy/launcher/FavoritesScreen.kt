@@ -50,10 +50,12 @@ fun FavoritesScreen(
     val context = LocalContext.current
     var contacts by remember { mutableStateOf<List<Contact>>(emptyList()) }
     var loaded by remember { mutableStateOf(false) }
+    var contactsGranted by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
+        contactsGranted = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED
         val lookupKeys = Prefs.getFavorites(context)
-        val resolved = lookupKeys.mapNotNull { getContactByLookupKey(context, it) }
+        val resolved = if (contactsGranted) lookupKeys.mapNotNull { getContactByLookupKey(context, it) } else emptyList()
         contacts = resolved
         loaded = true
     }
@@ -99,7 +101,10 @@ fun FavoritesScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Aucun favori. Ajoutez-en depuis l'administration.",
+                    text = if (!contactsGranted && Prefs.getFavorites(context).isNotEmpty())
+                        "Autorisez l'accès aux contacts dans l'administration."
+                    else
+                        "Aucun favori. Ajoutez-en depuis l'administration.",
                     fontSize = 20.sp,
                     color = Color(0xFF666666),
                     textAlign = TextAlign.Center

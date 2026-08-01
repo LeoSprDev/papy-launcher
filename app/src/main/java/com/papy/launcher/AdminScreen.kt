@@ -72,6 +72,7 @@ fun AdminScreen(
     var callPhoneGranted by remember { mutableStateOf(isGranted(context, Manifest.permission.CALL_PHONE)) }
     var callLogGranted by remember { mutableStateOf(isGranted(context, Manifest.permission.READ_CALL_LOG)) }
     var photosGranted by remember { mutableStateOf(isPhotosPermissionGranted(context)) }
+    var contactsGranted by remember { mutableStateOf(isGranted(context, Manifest.permission.READ_CONTACTS)) }
 
     // Re-vérifie les états quand l'admin revient au premier plan (après un Intent Settings)
     val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
@@ -84,6 +85,7 @@ fun AdminScreen(
             callPhoneGranted = isGranted(context, Manifest.permission.CALL_PHONE)
             callLogGranted = isGranted(context, Manifest.permission.READ_CALL_LOG)
             photosGranted = isPhotosPermissionGranted(context)
+            contactsGranted = isGranted(context, Manifest.permission.READ_CONTACTS)
         }
     }
     androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
@@ -386,10 +388,10 @@ fun AdminScreen(
 
         PermissionButton(
             label = "Contacts (favoris)",
-            granted = isGranted(context, Manifest.permission.READ_CONTACTS),
+            granted = contactsGranted,
             permission = Manifest.permission.READ_CONTACTS,
             context = context,
-            onResult = { }
+            onResult = { contactsGranted = it }
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -427,7 +429,6 @@ fun AdminScreen(
             }
         }
 
-        val contactsGranted = isGranted(context, Manifest.permission.READ_CONTACTS)
         AdminButton(
             label = if (contactsGranted) "Ajouter un favori" else "Autoriser les contacts d'abord"
         ) {
