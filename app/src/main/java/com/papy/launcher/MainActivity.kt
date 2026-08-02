@@ -186,7 +186,11 @@ class MainActivity : ComponentActivity() {
                 onCancel = { screen = "home" }
             )
             "admin" -> AdminScreen(
-                onExit = { screen = "home" }
+                onExit = { screen = "home" },
+                onManageFavorites = { screen = "manage_favorites" }
+            )
+            "manage_favorites" -> ManageFavoritesScreen(
+                onBack = { screen = "admin" }
             )
             "applist" -> AppListScreen(
                 onBack = { screen = "home" }
