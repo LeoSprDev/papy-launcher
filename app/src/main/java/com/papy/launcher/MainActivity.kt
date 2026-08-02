@@ -46,6 +46,7 @@ import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.SentimentVerySatisfied
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -528,5 +529,5 @@ fun shortcutIcon(id: ShortcutId): androidx.compose.ui.graphics.vector.ImageVecto
         ShortcutId.APPLIS -> Icons.Filled.Apps
         ShortcutId.APPAREIL_PHOTO -> Icons.Filled.PhotoCamera
         ShortcutId.PROUT -> Icons.Filled.SentimentVerySatisfied
-        ShortcutId.FAVORIS -> null
+        ShortcutId.FAVORIS -> Icons.Filled.Star
     }
