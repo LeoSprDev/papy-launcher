@@ -407,7 +407,11 @@ fun AdminScreen(
                 val cursor = try {
                     context.contentResolver.query(
                         uri,
-                        arrayOf(ContactsContract.Contacts._ID),
+                        arrayOf(
+                            ContactsContract.Contacts._ID,
+                            ContactsContract.Contacts.DISPLAY_NAME,
+                            ContactsContract.Contacts.LOOKUP_KEY
+                        ),
                         null, null, null
                     )
                 } catch (e: Exception) {
@@ -415,17 +419,13 @@ fun AdminScreen(
                 }
                 cursor?.use {
                     if (it.moveToFirst()) {
-                        val contactId = it.getLong(0)
-                        val lookupUri = ContactsContract.Contacts.getLookupUri(contactId, null)
-                        if (lookupUri != null) {
-                            val lookupKey = extractLookupKey(lookupUri)
-                            if (lookupKey != null) {
-                                if (Prefs.getFavorites(context).contains(lookupKey)) {
-                                    Toast.makeText(context, "Déjà dans les favoris", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    Prefs.addFavorite(context, lookupKey)
-                                    favorites.value = Prefs.getFavorites(context)
-                                }
+                        val lookupKey = it.getString(2)
+                        if (lookupKey != null) {
+                            if (Prefs.getFavorites(context).contains(lookupKey)) {
+                                Toast.makeText(context, "Déjà dans les favoris", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Prefs.addFavorite(context, lookupKey)
+                                favorites.value = Prefs.getFavorites(context)
                             }
                         }
                     }

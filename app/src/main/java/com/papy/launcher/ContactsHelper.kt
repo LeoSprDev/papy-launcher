@@ -12,17 +12,18 @@ data class Contact(
 )
 
 fun getContactByLookupKey(context: Context, lookupKey: String): Contact? {
-    val uri = ContactsContract.Contacts.getLookupUri(-1L, lookupKey) ?: return null
     val resolved = try {
         context.contentResolver.query(
-            uri,
+            ContactsContract.Contacts.CONTENT_URI,
             arrayOf(
                 ContactsContract.Contacts._ID,
                 ContactsContract.Contacts.DISPLAY_NAME,
                 ContactsContract.Contacts.PHOTO_URI,
                 ContactsContract.Contacts.HAS_PHONE_NUMBER
             ),
-            null, null, null
+            "${ContactsContract.Contacts.LOOKUP_KEY} = ?",
+            arrayOf(lookupKey),
+            null
         )
     } catch (e: Exception) {
         return null
@@ -38,16 +39,6 @@ fun getContactByLookupKey(context: Context, lookupKey: String): Contact? {
         return Contact(lookupKey, displayName, phoneNumber, photoUri)
     }
     return null
-}
-
-fun extractLookupKey(lookupUri: Uri): String? {
-    val path = lookupUri.path ?: return null
-    val marker = "/lookup/"
-    val idx = path.indexOf(marker)
-    if (idx < 0) return null
-    val afterMarker = path.substring(idx + marker.length)
-    val slashIdx = afterMarker.indexOf('/')
-    return if (slashIdx >= 0) afterMarker.substring(0, slashIdx) else afterMarker
 }
 
 private fun getPhoneNumber(context: Context, contactId: Long): String? {
