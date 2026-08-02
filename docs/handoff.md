@@ -1,6 +1,6 @@
 # Papy Launcher — Handoff
 
-**Date :** 2026-08-01
+**Date :** 2026-08-02
 **Repo GitHub :** https://github.com/LeoSprDev/papy-launcher
 **APK debug :** `app/build/outputs/apk/debug/app-debug.apk`
 
@@ -14,7 +14,7 @@ Papy Launcher est un launcher Android simple et accessible pour seniors (85 ans)
 
 | Feature | Statut |
 |---|---|
-| Écran d'accueil avec gros boutons colorés | ✅ |
+| Écran d'accueil avec gros boutons colorés (grille 2 colonnes, taille fixe) | ✅ |
 | Appels (dialer) | ✅ |
 | SMS (appli native) | ✅ |
 | WhatsApp (lancement + détection) | ✅ |
@@ -30,35 +30,40 @@ Papy Launcher est un launcher Android simple et accessible pour seniors (85 ans)
 | Mode kiosque (AccessibilityService — best effort) | ✅ |
 | Config admin : SOS on/off + numéro | ✅ |
 | Config admin : changement de PIN | ✅ |
-| Config admin : activer/désactiver raccourcis (8 boutons + Favoris) | ✅ |
+| Config admin : activer/désactiver raccourcis (9 boutons) | ✅ |
 | Config admin : réglages rapides (Wi-Fi, données, Bluetooth, affichage, son) | ✅ |
 | Config admin : slider luminosité | ✅ |
 | Config admin : liens directs vers autorisations système (notifications, overlay, accessibilité, write settings, launcher par défaut) | ✅ |
 | Config admin : indicateurs d'état des autorisations (pastilles vertes/grises + coche) | ✅ |
 | Config admin : boutons redemander permissions runtime (CALL_PHONE, READ_CALL_LOG, photos, READ_CONTACTS) | ✅ |
+| Contacts favoris (photo + appel direct) | ✅ |
+| Gestion des favoris (écran dédié : ajouter/retirer) | ✅ |
 | Écran admin scrollable | ✅ |
 | Génération APK debug | ✅ |
-| Git local + remote à jour | ✅ |
+| Git local + remote à jour (main) | ✅ |
 
 ### Boutons raccourcis (9 configurables)
 
-| ID | Label | Couleur | Action |
-|---|---|---|---|
-| APPELS | Appels | Vert Appel #2E7D32 | Dialer natif |
-| SMS | SMS | Bleu Message #1565C0 | Appli SMS native |
-| WHATSAPP | WhatsApp | Vert WhatsApp #075E54 | Lance WhatsApp |
-| MAIL | Mail | Orange Courrier #EF6C00 | Appli mail native |
-| PHOTOS | Photos | Violet Album #6A1B9A | Visionneur photos intégré |
-| APPLIS | Applis | Gris Réglages #455A64 | Liste applis installées |
-| APPAREIL_PHOTO | Appareil photo | Teal Caméra #00695C | Caméra native (Intent) |
-| PROUT | Prout | Violet Prout #8E63BC | Son synthétisé via AudioTrack |
-| FAVORIS | Favoris | Indigo Favoris #3949AB | Écran favoris (⚠ bug, voir #Bugs connus) |
+Ordre d'affichage sur l'écran d'accueil (haut-gauche → bas-droite, 2 par ligne) :
+
+| Position | ID | Label | Couleur | Icône | Action |
+|---|---|---|---|---|---|
+| 1 | APPELS | Appels | Vert Appel #2E7D32 | Phone | Dialer natif |
+| 2 | FAVORIS | Favoris | Indigo Favoris #3949AB | Star | Écran favoris (grille photo + appel direct) |
+| 3 | SMS | SMS | Bleu Message #1565C0 | Sms | Appli SMS native |
+| 4 | WHATSAPP | WhatsApp | Vert WhatsApp #075E54 | Chat | Lance WhatsApp |
+| 5 | MAIL | Mail | Orange Courrier #EF6C00 | Email | Appli mail native |
+| 6 | PHOTOS | Photos | Violet Album #6A1B9A | Photo | Visionneur photos intégré |
+| 7 | APPLIS | Applis | Gris Réglages #455A64 | Apps | Liste applis installées |
+| 8 | APPAREIL_PHOTO | Appareil photo | Teal Caméra #00695C | PhotoCamera | Caméra native (Intent) |
+| 9 | PROUT | Prout | Violet Prout #8E63BC | SentimentVerySatisfied | Son synthétisé via AudioTrack |
+
+> **Grille fixe :** si un nombre impair de tuiles est activé, la dernière tuile garde la même taille que les autres et reste à gauche (un `Spacer` avec `weight(1f)` occupe la place restante à droite).
 
 ### Ce qui reste à faire
 
 | Feature | Priorité | Notes |
 |---|---|---|
-| **Contacts favoris — bug affichage** | **Haute** | Voir bugs connus #1 et #2 (GitHub issues #1 #2). lookupKey invalide depuis PickContact → favoris vides |
 | Raccourcis réglages simplifiés sur l'écran d'accueil (pour papa) | Moyenne | Actuellement les réglages sont admin-only |
 | Device Owner + Lock Task Mode | Futur | Kiosque total (bloque vraiment le swipe notifs). Nécessite factory reset |
 | APK signé (release) | Basse | Pour publication Play Store éventuelle |
@@ -104,15 +109,16 @@ APK → `app/build/outputs/apk/debug/app-debug.apk`
 
 ```
 app/src/main/java/com/papy/launcher/
-├── MainActivity.kt              — Activity principale, navigation 6 écrans, UI accueil, lancement applis, permissions runtime, trigger admin (7 clics horloge)
+├── MainActivity.kt              — Activity principale, navigation 7 écrans, UI accueil, lancement applis, permissions runtime, trigger admin (7 clics horloge), grille fixe
 ├── Prefs.kt                    — SharedPreferences (PIN, SOS, kiosque, home button, raccourcis, favoris JSON)
 ├── Shortcuts.kt                — Modèle de données des raccourcis (enum ShortcutId 9 entrées + data class Shortcut)
 ├── PinScreen.kt                — Écran saisie PIN (pavé numérique grand)
-├── AdminScreen.kt              — Écran admin (SOS, PIN, kiosque, raccourcis, autorisations, permissions, réglages rapides, luminosité, favoris) — scrollable
+├── AdminScreen.kt              — Écran admin (SOS, PIN, kiosque, raccourcis, autorisations, permissions, réglages rapides, luminosité, bouton "Gérer les favoris") — scrollable
+├── ManageFavoritesScreen.kt    — Écran dédié gestion favoris (ajouter via picker contacts, retirer, liste avec photo + nom + numéro)
+├── FavoritesScreen.kt          — Écran favoris (grille LazyVerticalGrid 2 colonnes, photo + prénom, appel direct)
+├── ContactsHelper.kt           — Queries ContactsContract (getContactByLookupKey par LOOKUP_KEY, getPhoneNumber)
 ├── AppListScreen.kt            — Liste applis installées (icônes + noms)
 ├── PhotosScreen.kt             — Visionneur photos (grille LazyVerticalGrid + plein écran, Coil)
-├── FavoritesScreen.kt          — Écran favoris (grille LazyVerticalGrid 2 colonnes, photo + prénom, appel direct)
-├── ContactsHelper.kt           — Queries ContactsContract (getContactByLookupKey, extractLookupKey)
 ├── ProutSound.kt               — Synthèse son prout via AudioTrack
 ├── PapyNotificationListener.kt  — NotificationListenerService (badges SMS/mail/WhatsApp)
 ├── MissedCalls.kt               — Compteur appels manqués (query CallLog)
@@ -126,7 +132,7 @@ app/src/main/java/com/papy/launcher/
 
 ### Navigation (AppNavigation dans MainActivity)
 ```
-"home"  ←→  "pin"  ←→  "admin"
+"home"  ←→  "pin"  ←→  "admin"  ←→  "manage_favorites"
 "home"  ←→  "applist"
 "home"  ←→  "photos"
 "home"  ←→  "favorites"
@@ -136,6 +142,7 @@ app/src/main/java/com/papy/launcher/
 1. 7 clics sur l'horloge (dans les 2 secondes) → `"pin"`
 2. PIN correct → `"admin"`
 3. "Retour" → `"home"`
+4. Admin → "Gérer les favoris" → `"manage_favorites"` → "Retour" → `"admin"`
 
 ### Préférences stockées (Prefs.kt → SharedPreferences `papy_prefs`)
 | Clé | Type | Défaut |
@@ -162,6 +169,9 @@ Boutons « Redemander » (boîte système runtime, fallback page d'infos appli s
 - Journal d'appels (appels manqués) → `READ_CALL_LOG`
 - Photos (visionneur) → `READ_MEDIA_IMAGES` / `READ_EXTERNAL_STORAGE`
 - Contacts (favoris) → `READ_CONTACTS`
+
+### Section « Favoris » (admin)
+Bouton unique « Gérer les favoris » → navigue vers `ManageFavoritesScreen`. Si la permission `READ_CONTACTS` n'est pas accordée, un message d'avertissement s'affiche sous le bouton.
 
 ---
 
@@ -220,13 +230,18 @@ Boutons « Redemander » (boîte système runtime, fallback page d'infos appli s
 
 | Problème | Cause | Statut |
 |---|---|---|
-| **Favoris vides (issue #1)** | `ActivityResultContracts.PickContact()` retourne une URI `content://com.android.contacts/data/<id>`. Le `_ID` récupéré est un `Data._ID` pas un `Contacts._ID` → `getLookupUri(contactId, null)` génère un lookupKey invalide → `getContactByLookupKey` retourne null → liste vide | **À corriger** — piste : récupérer `DISPLAY_NAME` + numéro depuis le picker et query `Contacts.CONTENT_URI` par nom, ou utiliser `Intent.ACTION_PICK` sur `Contacts.CONTENT_URI` directement |
-| **Pas d'UI retirer favori (issue #2)** | Conséquence de #1 : la liste admin est vide donc le bouton « Retirer » n'apparaît jamais | Bloqué par #1 |
 | Swipe notifications non bloqué | AccessibilityService trop lent, immersive sticky recache mais ne bloque pas | Limitation Android sans root. Alternative : Device Owner + Lock Task Mode |
 | Bouton Home flottant peut disparaître | Android peut tuer le service foreground sous pression mémoire | Relancer l'app si besoin |
-| Pas d'icône perso | Icône Android par défaut | À faire |
+| Pas d'icône d'appli perso | Icône Android par défaut | À faire |
 | `getActiveNotifications()` depuis l'activity | Ne marche que depuis le service | Contourné : service bind lui-même dans BadgeStore |
 | `LocalLifecycleOwner` déprécié | Déplacé vers `lifecycle-runtime-compose` (non ajouté au projet) | Warning bénin, fonctionne toujours |
+
+### Bugs résolus (historique)
+
+| Problème | Cause | Solution | Issue |
+|---|---|---|---|
+| Favoris vides | `getLookupUri(-1L, lookupKey)` générait une URI `.../lookup/<key>/-1` rejetée par le provider contacts (IllegalArgumentException) | Query directe sur `Contacts.CONTENT_URI` avec `WHERE LOOKUP_KEY = ?` | #1 ✅ |
+| Pas d'UI retirer favori | Conséquence du bug #1 : la liste admin était vide | Corrigé automatiquement avec #1 | #2 ✅ |
 
 ---
 
@@ -234,6 +249,7 @@ Boutons « Redemander » (boîte système runtime, fallback page d'infos appli s
 
 | Fichier | Contenu |
 |---|---|
+| `README.md` | Présentation complète (features, install, compatibilité, architecture) |
 | `docs/2026-07-31-journal-dev.md` | Journal initial : contexte, install, code, bugs, décisions |
 | `docs/parametrage-telephone.md` | Paramétrages téléphone étape par étape (12 étapes) |
 | `docs/handoff.md` | Ce fichier — état du projet, architecture, reprise |
@@ -245,18 +261,23 @@ Boutons « Redemander » (boîte système runtime, fallback page d'infos appli s
 
 ---
 
-## Évolutions de la session 2026-08-01
+## Évolutions de la session 2026-08-01 / 2026-08-02
 
 | Évolution | Fichiers touchés | Détail |
 |---|---|---|
 | Bouton Home centre-droite | `HomeButtonService.kt` | `Gravity.CENTER_VERTICAL or Gravity.END` au lieu de `TOP or END` |
-| Imports icônes Material | `MainActivity.kt` | 9 imports explicites `Icons.Filled.*` (FQN ne marche pas pour extensions) |
+| Imports icônes Material | `MainActivity.kt` | Imports explicites `Icons.Filled.*` (FQN ne marche pas pour extensions) |
 | Section Autorisations système | `AdminScreen.kt` | 5 boutons liens Settings + indicateurs d'état (pastilles vertes/grises) |
 | Section Permissions appli | `AdminScreen.kt` | 4 boutons Redemander (CALL_PHONE, READ_CALL_LOG, photos, READ_CONTACTS) |
 | Trigger admin 7 clics | `MainActivity.kt` | Remplace long appui 2s — 7 clics sur horloge dans 2s |
 | Toast kiosque + warning | `AdminScreen.kt` | Toast « Trouvez Papy Launcher » + warning rouge si kiosque on mais service inactif |
 | Boutons Appareil photo + Prout | `Shortcuts.kt`, `MainActivity.kt`, `ProutSound.kt`, `AndroidManifest.xml`, `strings.xml`, `DESIGN.md` | Spec + implémentation (caméra native + son synthétisé AudioTrack) |
-| Contacts favoris | `Shortcuts.kt`, `Prefs.kt`, `ContactsHelper.kt`, `FavoritesScreen.kt`, `MainActivity.kt`, `AdminScreen.kt`, `AndroidManifest.xml`, `strings.xml`, `DESIGN.md` | Spec + plan + implémentation (⚠ bug affichage, voir issues #1 #2) |
+| Contacts favoris | `Shortcuts.kt`, `Prefs.kt`, `ContactsHelper.kt`, `FavoritesScreen.kt`, `MainActivity.kt`, `AdminScreen.kt`, `AndroidManifest.xml`, `strings.xml`, `DESIGN.md` | Spec + plan + implémentation. Fix bug affichage (query par LOOKUP_KEY). Gestion via écran dédié `ManageFavoritesScreen`. |
+| Réordonnancement des tuiles | `Shortcuts.kt` | Ordre : Appels, Favoris, SMS, WhatsApp, Mail, Photos, Applis, Appareil photo, Prout |
+| Grille fixe (taille des tuiles) | `MainActivity.kt` | `Spacer(weight 1f)` quand rangée incomplète — la dernière tuile ne s'étire pas |
+| Icône Favoris | `MainActivity.kt` | `Icons.Filled.Star` (était `null`) |
+| README complet | `README.md` | Présentation, features, install, compatibilité, architecture, principes |
+| Suppression branche feature | git | `feature/favoris-contacts` fusionnée dans `main` puis supprimée (local + remote) |
 
 ---
 
