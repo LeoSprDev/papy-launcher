@@ -178,19 +178,27 @@ class MainActivity : ComponentActivity() {
             "home" -> HomeScreen(
                 onAdminTrigger = { screen = "pin" },
                 onApplis = { screen = "applist" },
-                onPhotos = { screen = "photos" }
+                onPhotos = { screen = "photos" },
+                onFavorites = { screen = "favorites" }
             )
             "pin" -> PinScreen(
                 onSuccess = { screen = "admin" },
                 onCancel = { screen = "home" }
             )
             "admin" -> AdminScreen(
-                onExit = { screen = "home" }
+                onExit = { screen = "home" },
+                onManageFavorites = { screen = "manage_favorites" }
+            )
+            "manage_favorites" -> ManageFavoritesScreen(
+                onBack = { screen = "admin" }
             )
             "applist" -> AppListScreen(
                 onBack = { screen = "home" }
             )
             "photos" -> PhotosScreen(
+                onBack = { screen = "home" }
+            )
+            "favorites" -> FavoritesScreen(
                 onBack = { screen = "home" }
             )
         }
@@ -213,7 +221,8 @@ class MainActivity : ComponentActivity() {
 fun HomeScreen(
     onAdminTrigger: () -> Unit,
     onApplis: () -> Unit,
-    onPhotos: () -> Unit
+    onPhotos: () -> Unit,
+    onFavorites: () -> Unit
 ) {
     val context = LocalContext.current
 
@@ -280,6 +289,7 @@ fun HomeScreen(
                         ShortcutId.APPLIS -> { ctx -> onApplis() }
                         ShortcutId.APPAREIL_PHOTO -> { ctx -> launchCamera(ctx) }
                         ShortcutId.PROUT -> { ctx -> playFartSound(ctx) }
+                        ShortcutId.FAVORIS -> { ctx -> onFavorites() }
                     }
                     BigButton(
                         label = stringResource(sc.labelRes),
@@ -518,4 +528,5 @@ fun shortcutIcon(id: ShortcutId): androidx.compose.ui.graphics.vector.ImageVecto
         ShortcutId.APPLIS -> Icons.Filled.Apps
         ShortcutId.APPAREIL_PHOTO -> Icons.Filled.PhotoCamera
         ShortcutId.PROUT -> Icons.Filled.SentimentVerySatisfied
+        ShortcutId.FAVORIS -> null
     }

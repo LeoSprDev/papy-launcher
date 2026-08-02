@@ -11,6 +11,7 @@
     <string name="btn_applis">Applis</string>
     <string name="btn_appareil_photo">Appareil photo</string>
     <string name="btn_prout">Prout</string>
+    <string name="btn_favoris">Favoris</string>
 
     <!-- Divers -->
     <string name="sos_default_number">112</string>

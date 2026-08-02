@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -54,7 +55,8 @@ import androidx.core.content.ContextCompat
 
 @Composable
 fun AdminScreen(
-    onExit: () -> Unit
+    onExit: () -> Unit,
+    onManageFavorites: () -> Unit
 ) {
     val context = LocalContext.current
     var sosNumber by remember { mutableStateOf(Prefs.getSosNumber(context)) }
@@ -70,6 +72,7 @@ fun AdminScreen(
     var callPhoneGranted by remember { mutableStateOf(isGranted(context, Manifest.permission.CALL_PHONE)) }
     var callLogGranted by remember { mutableStateOf(isGranted(context, Manifest.permission.READ_CALL_LOG)) }
     var photosGranted by remember { mutableStateOf(isPhotosPermissionGranted(context)) }
+    var contactsGranted by remember { mutableStateOf(isGranted(context, Manifest.permission.READ_CONTACTS)) }
 
     // Re-vérifie les états quand l'admin revient au premier plan (après un Intent Settings)
     val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
@@ -82,6 +85,7 @@ fun AdminScreen(
             callPhoneGranted = isGranted(context, Manifest.permission.CALL_PHONE)
             callLogGranted = isGranted(context, Manifest.permission.READ_CALL_LOG)
             photosGranted = isPhotosPermissionGranted(context)
+            contactsGranted = isGranted(context, Manifest.permission.READ_CONTACTS)
         }
     }
     androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
@@ -380,6 +384,32 @@ fun AdminScreen(
             context = context,
             onResult = { photosGranted = it }
         )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        PermissionButton(
+            label = "Contacts (favoris)",
+            granted = contactsGranted,
+            permission = Manifest.permission.READ_CONTACTS,
+            context = context,
+            onResult = { contactsGranted = it }
+        )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Section Favoris (bouton vers écran dédié)
+        SectionTitle("Favoris")
+
+        AdminButton("Gérer les favoris") {
+            onManageFavorites()
+        }
+        if (!contactsGranted) {
+            Text(
+                text = "Autorisez d'abord les contacts (section Permissions ci-dessous).",
+                fontSize = 14.sp,
+                color = Color(0xFF666666),
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
 
         Spacer(modifier = Modifier.height(32.dp))
 

@@ -2,6 +2,7 @@ package com.papy.launcher
 
 import android.content.Context
 import android.content.SharedPreferences
+import org.json.JSONArray
 
 object Prefs {
     private const val PREFS_NAME = "papy_prefs"
@@ -64,4 +65,30 @@ object Prefs {
 
     fun getEnabledShortcuts(context: Context): List<Shortcut> =
         Shortcuts.all.filter { isShortcutEnabled(context, it.id) }
+
+    private const val KEY_FAVORITES = "favorites_list"
+
+    fun getFavorites(context: Context): List<String> {
+        val json = prefs(context).getString(KEY_FAVORITES, null) ?: return emptyList()
+        return try {
+            val arr = JSONArray(json)
+            (0 until arr.length()).map { arr.getString(it) }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    fun addFavorite(context: Context, lookupKey: String) {
+        val current = getFavorites(context).toMutableList()
+        if (lookupKey in current) return
+        current.add(lookupKey)
+        prefs(context).edit().putString(KEY_FAVORITES, JSONArray(current).toString()).apply()
+    }
+
+    fun removeFavorite(context: Context, lookupKey: String) {
+        val current = getFavorites(context).toMutableList()
+        if (lookupKey !in current) return
+        current.remove(lookupKey)
+        prefs(context).edit().putString(KEY_FAVORITES, JSONArray(current).toString()).apply()
+    }
 }
