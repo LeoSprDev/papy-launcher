@@ -270,7 +270,7 @@ fun HomeScreen(
         for (rowShortcuts in rows) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 for (sc in rowShortcuts) {
                     val badge = when (sc.id) {
@@ -297,9 +297,9 @@ fun HomeScreen(
                         icon = shortcutIcon(sc.id),
                         badge = badge
                     ) { action(context) }
-                    if (rowShortcuts.indexOf(sc) == 0 && rowShortcuts.size > 1) {
-                        Spacer(modifier = Modifier.width(16.dp))
-                    }
+                }
+                if (rowShortcuts.size == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
