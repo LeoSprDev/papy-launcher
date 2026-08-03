@@ -10,7 +10,7 @@ class PapyKioskService : AccessibilityService() {
     companion object {
         const val LAUNCHER_PACKAGE = "com.papy.launcher"
 
-        val ALLOWED_PACKAGES = setOf(
+        val BASE_ALLOWED_PACKAGES = setOf(
             LAUNCHER_PACKAGE,
             "com.android.dialer",
             "com.google.android.dialer",
@@ -40,6 +40,11 @@ class PapyKioskService : AccessibilityService() {
 
         var enabled = false
 
+        fun allowedPackages(context: Context): Set<String> {
+            val dynamic = Prefs.getDynamicApps(context).map { it.packageName }.toSet()
+            return BASE_ALLOWED_PACKAGES + dynamic
+        }
+
         fun isRunning(context: Context): Boolean {
             val flat = Settings.Secure.getString(
                 context.contentResolver,
@@ -54,6 +59,7 @@ class PapyKioskService : AccessibilityService() {
         if (event == null) return
 
         val pkg = event.packageName?.toString() ?: return
+        val allowed = allowedPackages(this)
 
         when (event.eventType) {
             AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED -> {
@@ -61,7 +67,7 @@ class PapyKioskService : AccessibilityService() {
                     performGlobalAction(GLOBAL_ACTION_HOME)
                     return
                 }
-                if (pkg != LAUNCHER_PACKAGE && pkg !in ALLOWED_PACKAGES) {
+                if (pkg != LAUNCHER_PACKAGE && pkg !in allowed) {
                     performGlobalAction(GLOBAL_ACTION_HOME)
                 }
             }
