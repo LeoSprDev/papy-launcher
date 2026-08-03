@@ -50,6 +50,14 @@ import androidx.compose.material.icons.filled.Photo
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.SentimentVerySatisfied
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.BatteryFull
+import androidx.compose.material.icons.filled.BatteryChargingFull
+import androidx.compose.material.icons.filled.Battery5Bar
+import androidx.compose.material.icons.filled.Battery4Bar
+import androidx.compose.material.icons.filled.Battery3Bar
+import androidx.compose.material.icons.filled.Battery2Bar
+import androidx.compose.material.icons.filled.Battery1Bar
+import androidx.compose.material.icons.filled.Battery0Bar
 import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -376,11 +384,25 @@ fun HomeScreen(
 
 @Composable
 fun ClockHeader(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
     var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
+    var batteryLevel by remember { mutableStateOf(0) }
+    var isCharging by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
         while (true) {
-            delay(1000L)
             currentTime = System.currentTimeMillis()
+            val intent = context.registerReceiver(null, android.content.IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+            if (intent != null) {
+                val level = intent.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1)
+                val scale = intent.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, -1)
+                if (level >= 0 && scale > 0) {
+                    batteryLevel = (level * 100) / scale
+                }
+                val status = intent.getIntExtra(android.os.BatteryManager.EXTRA_STATUS, -1)
+                isCharging = status == android.os.BatteryManager.BATTERY_STATUS_CHARGING ||
+                    status == android.os.BatteryManager.BATTERY_STATUS_FULL
+            }
+            delay(30000L)
         }
     }
     val timeStr = remember(currentTime) {
@@ -389,27 +411,73 @@ fun ClockHeader(modifier: Modifier = Modifier) {
     val dateStr = remember(currentTime) {
         SimpleDateFormat("EEEE d MMMM", Locale.FRANCE).format(Date(currentTime))
     }
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
+    Box(
+        modifier = modifier.fillMaxWidth()
     ) {
-        Text(
-            text = "Papy Launcher",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Normal,
-            color = Color(0xFF888888)
+        BatteryIndicator(
+            level = batteryLevel,
+            isCharging = isCharging,
+            modifier = Modifier.align(Alignment.TopEnd)
+        )
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Papy Launcher",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color(0xFF888888)
+            )
+            Text(
+                text = timeStr,
+                fontSize = 48.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1A237E)
+            )
+            Text(
+                text = dateStr.replaceFirstChar { it.uppercase() },
+                fontSize = 22.sp,
+                color = Color(0xFF333333),
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun BatteryIndicator(level: Int, isCharging: Boolean, modifier: Modifier = Modifier) {
+    val batteryColor = when {
+        isCharging -> Color(0xFF2E7D32)
+        level <= 15 -> Color(0xFFC62828)
+        level <= 30 -> Color(0xFFEF6C00)
+        else -> Color(0xFF333333)
+    }
+    val batteryIcon = when {
+        isCharging -> Icons.Filled.BatteryChargingFull
+        level >= 90 -> Icons.Filled.BatteryFull
+        level >= 60 -> Icons.Filled.Battery5Bar
+        level >= 40 -> Icons.Filled.Battery4Bar
+        level >= 20 -> Icons.Filled.Battery3Bar
+        level >= 10 -> Icons.Filled.Battery2Bar
+        level >= 5 -> Icons.Filled.Battery1Bar
+        else -> Icons.Filled.Battery0Bar
+    }
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier.padding(top = 8.dp)
+    ) {
+        androidx.compose.material3.Icon(
+            imageVector = batteryIcon,
+            contentDescription = null,
+            tint = batteryColor,
+            modifier = Modifier.size(32.dp)
         )
         Text(
-            text = timeStr,
-            fontSize = 48.sp,
+            text = "$level%",
+            fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1A237E)
-        )
-        Text(
-            text = dateStr.replaceFirstChar { it.uppercase() },
-            fontSize = 22.sp,
-            color = Color(0xFF333333),
-            modifier = Modifier.padding(top = 4.dp)
+            color = batteryColor
         )
     }
 }
