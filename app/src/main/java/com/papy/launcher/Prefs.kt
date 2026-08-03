@@ -13,7 +13,7 @@ object Prefs {
     private const val KEY_HOME_BUTTON = "home_button_enabled"
     private const val DEFAULT_PIN = "0000"
 
-    private fun prefs(context: Context): SharedPreferences =
+    internal fun prefs(context: Context): SharedPreferences =
         context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     fun getPin(context: Context): String =
