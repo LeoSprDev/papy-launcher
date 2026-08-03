@@ -6,6 +6,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -71,6 +72,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.papy.launcher.ui.theme.PapyLauncherTheme
 
 class MainActivity : ComponentActivity() {
@@ -362,6 +364,7 @@ fun RowScope.BigButton(
     label: String,
     color: Color,
     icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    drawableIcon: Drawable? = null,
     badge: Int = 0,
     onClick: () -> Unit
 ) {
@@ -378,7 +381,26 @@ fun RowScope.BigButton(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            if (icon != null) {
+            if (drawableIcon != null) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(Color.White),
+                    contentAlignment = Alignment.Center
+                ) {
+                    AndroidView(
+                        factory = { ctx ->
+                            android.widget.ImageView(ctx).apply {
+                                setImageDrawable(drawableIcon)
+                                layoutParams = android.view.ViewGroup.LayoutParams(32, 32)
+                            }
+                        },
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+            } else if (icon != null) {
                 androidx.compose.material3.Icon(
                     imageVector = icon,
                     contentDescription = null,
