@@ -190,10 +190,18 @@ class MainActivity : ComponentActivity() {
             )
             "admin" -> AdminScreen(
                 onExit = { screen = "home" },
-                onManageFavorites = { screen = "manage_favorites" }
+                onManageFavorites = { screen = "manage_favorites" },
+                onManageApps = { screen = "manage_apps" }
             )
             "manage_favorites" -> ManageFavoritesScreen(
                 onBack = { screen = "admin" }
+            )
+            "manage_apps" -> ManageAppsScreen(
+                onBack = { screen = "admin" },
+                onAddApp = { screen = "app_picker" }
+            )
+            "app_picker" -> AppPickerScreen(
+                onBack = { screen = "manage_apps" }
             )
             "applist" -> AppListScreen(
                 onBack = { screen = "home" }
