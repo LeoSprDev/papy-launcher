@@ -56,7 +56,8 @@ import androidx.core.content.ContextCompat
 @Composable
 fun AdminScreen(
     onExit: () -> Unit,
-    onManageFavorites: () -> Unit
+    onManageFavorites: () -> Unit,
+    onManageApps: () -> Unit
 ) {
     val context = LocalContext.current
     var sosNumber by remember { mutableStateOf(Prefs.getSosNumber(context)) }
@@ -409,6 +410,14 @@ fun AdminScreen(
                 color = Color(0xFF666666),
                 modifier = Modifier.padding(top = 8.dp)
             )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        SectionTitle("Applis")
+
+        AdminButton("Gérer les applis") {
+            onManageApps()
         }
 
         Spacer(modifier = Modifier.height(32.dp))

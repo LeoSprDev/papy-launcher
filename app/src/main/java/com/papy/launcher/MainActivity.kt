@@ -6,6 +6,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -36,7 +37,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Apps
@@ -71,6 +74,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import com.papy.launcher.ui.theme.PapyLauncherTheme
 
 class MainActivity : ComponentActivity() {
@@ -124,14 +128,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        stopHomeButtonService()
     }
 
     override fun onPause() {
         super.onPause()
-        if (Prefs.isHomeButtonEnabled(this)) {
-            startHomeButtonService()
-        }
     }
 
     private fun startHomeButtonService() {
@@ -169,6 +169,13 @@ class MainActivity : ComponentActivity() {
         if (hasFocus && Prefs.isKioskEnabled(this)) {
             hideSystemBars()
         }
+        if (hasFocus) {
+            stopHomeButtonService()
+        } else {
+            if (Prefs.isHomeButtonEnabled(this)) {
+                startHomeButtonService()
+            }
+        }
     }
 
     @OptIn(ExperimentalFoundationApi::class)
@@ -188,10 +195,18 @@ class MainActivity : ComponentActivity() {
             )
             "admin" -> AdminScreen(
                 onExit = { screen = "home" },
-                onManageFavorites = { screen = "manage_favorites" }
+                onManageFavorites = { screen = "manage_favorites" },
+                onManageApps = { screen = "manage_apps" }
             )
             "manage_favorites" -> ManageFavoritesScreen(
                 onBack = { screen = "admin" }
+            )
+            "manage_apps" -> ManageAppsScreen(
+                onBack = { screen = "admin" },
+                onAddApp = { screen = "app_picker" }
+            )
+            "app_picker" -> AppPickerScreen(
+                onBack = { screen = "manage_apps" }
             )
             "applist" -> AppListScreen(
                 onBack = { screen = "home" }
@@ -241,9 +256,10 @@ fun HomeScreen(
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding()
-            .padding(16.dp),
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         var tapCount by remember { mutableStateOf(0) }
         var lastTapTime by remember { mutableStateOf(0L) }
@@ -300,6 +316,45 @@ fun HomeScreen(
                     ) { action(context) }
                 }
                 if (rowShortcuts.size == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
+        }
+
+        val dynamicApps = remember { Prefs.getDynamicApps(context) }
+        val appRows = dynamicApps.chunked(2)
+        for (rowApps in appRows) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                for (app in rowApps) {
+                    val pm = context.packageManager
+                    val launchIntent = pm.getLaunchIntentForPackage(app.packageName)
+                    val appLabel = try {
+                        pm.getApplicationLabel(pm.getApplicationInfo(app.packageName, 0)).toString()
+                    } catch (e: Exception) {
+                        app.label
+                    }
+                    val appIcon = try {
+                        pm.getApplicationIcon(app.packageName)
+                    } catch (e: Exception) {
+                        null
+                    }
+                    BigButton(
+                        label = appLabel,
+                        color = Color(0xFF546E7A),
+                        drawableIcon = appIcon,
+                        badge = 0
+                    ) {
+                        if (launchIntent != null) {
+                            launchApp(context, app.packageName)
+                        } else {
+                            Toast.makeText(context, "$appLabel n'est plus installée", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+                if (rowApps.size == 1) {
                     Spacer(modifier = Modifier.weight(1f))
                 }
             }
@@ -362,6 +417,7 @@ fun RowScope.BigButton(
     label: String,
     color: Color,
     icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    drawableIcon: Drawable? = null,
     badge: Int = 0,
     onClick: () -> Unit
 ) {
@@ -378,7 +434,26 @@ fun RowScope.BigButton(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            if (icon != null) {
+            if (drawableIcon != null) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(Color.White),
+                    contentAlignment = Alignment.Center
+                ) {
+                    AndroidView(
+                        factory = { ctx ->
+                            android.widget.ImageView(ctx).apply {
+                                setImageDrawable(drawableIcon)
+                                layoutParams = android.view.ViewGroup.LayoutParams(32, 32)
+                            }
+                        },
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+            } else if (icon != null) {
                 androidx.compose.material3.Icon(
                     imageVector = icon,
                     contentDescription = null,
