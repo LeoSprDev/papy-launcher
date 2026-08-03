@@ -307,6 +307,45 @@ fun HomeScreen(
             }
         }
 
+        val dynamicApps = remember { Prefs.getDynamicApps(context) }
+        val appRows = dynamicApps.chunked(2)
+        for (rowApps in appRows) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                for (app in rowApps) {
+                    val pm = context.packageManager
+                    val launchIntent = pm.getLaunchIntentForPackage(app.packageName)
+                    val appLabel = try {
+                        pm.getApplicationLabel(pm.getApplicationInfo(app.packageName, 0)).toString()
+                    } catch (e: Exception) {
+                        app.label
+                    }
+                    val appIcon = try {
+                        pm.getApplicationIcon(app.packageName)
+                    } catch (e: Exception) {
+                        null
+                    }
+                    BigButton(
+                        label = appLabel,
+                        color = Color(0xFF546E7A),
+                        drawableIcon = appIcon,
+                        badge = 0
+                    ) {
+                        if (launchIntent != null) {
+                            launchApp(context, app.packageName)
+                        } else {
+                            Toast.makeText(context, "$appLabel n'est plus installée", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+                if (rowApps.size == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+            }
+        }
+
         if (Prefs.isSosVisible(context)) {
             BigSosButton(
                 label = stringResource(R.string.btn_sos),
