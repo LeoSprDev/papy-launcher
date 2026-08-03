@@ -128,14 +128,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        stopHomeButtonService()
     }
 
     override fun onPause() {
         super.onPause()
-        if (Prefs.isHomeButtonEnabled(this)) {
-            startHomeButtonService()
-        }
     }
 
     private fun startHomeButtonService() {
@@ -172,6 +168,13 @@ class MainActivity : ComponentActivity() {
         super.onWindowFocusChanged(hasFocus)
         if (hasFocus && Prefs.isKioskEnabled(this)) {
             hideSystemBars()
+        }
+        if (hasFocus) {
+            stopHomeButtonService()
+        } else {
+            if (Prefs.isHomeButtonEnabled(this)) {
+                startHomeButtonService()
+            }
         }
     }
 
