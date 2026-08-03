@@ -1,8 +1,8 @@
 # Papy Launcher — Handoff
 
-**Date :** 2026-08-02
+**Date :** 2026-08-03
 **Repo GitHub :** https://github.com/LeoSprDev/papy-launcher
-**APK debug :** `app/build/outputs/apk/debug/app-debug.apk`
+**APK debug :** `app/build/outputs/apk/debug/app-debug.apk` (~19 Mo)
 
 ---
 
@@ -26,8 +26,9 @@ Papy Launcher est un launcher Android simple et accessible pour seniors (85 ans)
 | Pastilles notif (appels manqués, SMS, mail, WhatsApp) | ✅ |
 | Bouton Home flottant au-dessus des autres applis (centre-droite) | ✅ |
 | Heure + date en gros sur l'écran d'accueil | ✅ |
+| Indicateur batterie (pourcentage + icône, couleur selon niveau) | ✅ |
 | Thème clair forcé (lisibilité) | ✅ |
-| Mode kiosque (AccessibilityService — best effort) | ✅ |
+| Mode kiosque (AccessibilityService — best effort, liste blanche dynamique) | ✅ |
 | Config admin : SOS on/off + numéro | ✅ |
 | Config admin : changement de PIN | ✅ |
 | Config admin : activer/désactiver raccourcis (9 boutons) | ✅ |
@@ -38,6 +39,8 @@ Papy Launcher est un launcher Android simple et accessible pour seniors (85 ans)
 | Config admin : boutons redemander permissions runtime (CALL_PHONE, READ_CALL_LOG, photos, READ_CONTACTS) | ✅ |
 | Contacts favoris (photo + appel direct) | ✅ |
 | Gestion des favoris (écran dédié : ajouter/retirer) | ✅ |
+| Tuiles d'applis dynamiques (admin choisit les applis, icône native, couleur Bleu Acier) | ✅ |
+| Gestion des applis dynamiques (écran dédié : ajouter/retirer) | ✅ |
 | Écran admin scrollable | ✅ |
 | Génération APK debug | ✅ |
 | Git local + remote à jour (main) | ✅ |
@@ -58,7 +61,20 @@ Ordre d'affichage sur l'écran d'accueil (haut-gauche → bas-droite, 2 par lign
 | 8 | APPAREIL_PHOTO | Appareil photo | Teal Caméra #00695C | PhotoCamera | Caméra native (Intent) |
 | 9 | PROUT | Prout | Violet Prout #8E63BC | SentimentVerySatisfied | Son synthétisé via AudioTrack |
 
-> **Grille fixe :** si un nombre impair de tuiles est activé, la dernière tuile garde la même taille que les autres et reste à gauche (un `Spacer` avec `weight(1f)` occupe la place restante à droite).
+> **Grille fusionnée :** les raccourcis fixes et les tuiles d'applis dynamiques sont fusionnés en une seule liste avant le chunking par 2. La première tuile dynamique remplit le trou de la dernière rangée fixe si le nombre de raccourcis fixes est impair.
+
+### Tuiles d'applis dynamiques (illimitées)
+
+| Caractéristique | Valeur |
+|---|---|
+| Couleur | Bleu Acier #546E7A |
+| Icône | Icône native de l'appli (PackageManager.getApplicationIcon) dans un médaillon blanc 40dp |
+| Label | Nom de l'appli (résolu via PackageManager à chaque affichage) |
+| Action | `getLaunchIntentForPackage` + `safeStartActivity` |
+| Ordre | Après les 9 raccourcis fixes, dans l'ordre d'ajout |
+| Stockage | `dynamic_apps_list` en JSON dans SharedPreferences (packageName + label) |
+| Sélection | Écran `AppPickerScreen` — liste des applis installées (reuse de `loadInstalledApps`) |
+| Gestion | Écran `ManageAppsScreen` — ajouter/retirer, détection appli désinstallée |
 
 ### Ce qui reste à faire
 
@@ -93,10 +109,10 @@ Ordre d'affichage sur l'écran d'accueil (haut-gauche → bas-droite, 2 par lign
 ```bash
 ./gradlew assembleDebug
 ```
-APK → `app/build/outputs/apk/debug/app-debug.apk`
+APK → `app/build/outputs/apk/debug/app-debug.apk` (~19 Mo)
 
 ### 5. Installer l'APK sur un téléphone
-- Copier `app-debug.apk` sur le téléphone (USB, Drive, etc.)
+- Copier `app-debug.apk` sur le téléphone (USB, mail, Drive, etc.)
 - Sur le téléphone, ouvrir le fichier → Installer
 - Activer "Sources inconnues" si demandé
 
@@ -109,20 +125,23 @@ APK → `app/build/outputs/apk/debug/app-debug.apk`
 
 ```
 app/src/main/java/com/papy/launcher/
-├── MainActivity.kt              — Activity principale, navigation 7 écrans, UI accueil, lancement applis, permissions runtime, trigger admin (7 clics horloge), grille fixe
-├── Prefs.kt                    — SharedPreferences (PIN, SOS, kiosque, home button, raccourcis, favoris JSON)
+├── MainActivity.kt              — Activity principale, navigation 9 écrans, UI accueil, lancement applis, permissions runtime, trigger admin (7 clics horloge), grille fusionnée (fixes + dynamiques), batterie, HomeTile sealed class
+├── Prefs.kt                    — SharedPreferences (PIN, SOS, kiosque, home button, raccourcis, favoris JSON, dynamic apps JSON)
 ├── Shortcuts.kt                — Modèle de données des raccourcis (enum ShortcutId 9 entrées + data class Shortcut)
+├── DynamicApp.kt               — Data class DynamicApp + helpers Prefs (getDynamicApps, addDynamicApp, removeDynamicApp)
 ├── PinScreen.kt                — Écran saisie PIN (pavé numérique grand)
-├── AdminScreen.kt              — Écran admin (SOS, PIN, kiosque, raccourcis, autorisations, permissions, réglages rapides, luminosité, bouton "Gérer les favoris") — scrollable
+├── AdminScreen.kt              — Écran admin (SOS, PIN, kiosque, raccourcis, autorisations, permissions, favoris, applis, réglages rapides, luminosité) — scrollable
 ├── ManageFavoritesScreen.kt    — Écran dédié gestion favoris (ajouter via picker contacts, retirer, liste avec photo + nom + numéro)
+├── ManageAppsScreen.kt         — Écran dédié gestion applis dynamiques (ajouter/retirer, détection désinstallée)
+├── AppPickerScreen.kt          — Écran de sélection d'applis (liste des applis installées, tap = ajout)
 ├── FavoritesScreen.kt          — Écran favoris (grille LazyVerticalGrid 2 colonnes, photo + prénom, appel direct)
 ├── ContactsHelper.kt           — Queries ContactsContract (getContactByLookupKey par LOOKUP_KEY, getPhoneNumber)
-├── AppListScreen.kt            — Liste applis installées (icônes + noms)
+├── AppListScreen.kt            — Liste applis installées (icônes + noms) + loadInstalledApps + AppRow + AppIcon (réutilisés)
 ├── PhotosScreen.kt             — Visionneur photos (grille LazyVerticalGrid + plein écran, Coil)
 ├── ProutSound.kt               — Synthèse son prout via AudioTrack
 ├── PapyNotificationListener.kt  — NotificationListenerService (badges SMS/mail/WhatsApp)
 ├── MissedCalls.kt               — Compteur appels manqués (query CallLog)
-├── PapyKioskService.kt         — AccessibilityService mode kiosque (liste blanche applis)
+├── PapyKioskService.kt         — AccessibilityService mode kiosque (liste blanche de base + applis dynamiques)
 ├── HomeButtonService.kt         — Service foreground bouton Home flottant (WindowManager overlay, centre-droite)
 └── ui/theme/
     ├── Theme.kt                 — Thème clair forcé
@@ -133,6 +152,7 @@ app/src/main/java/com/papy/launcher/
 ### Navigation (AppNavigation dans MainActivity)
 ```
 "home"  ←→  "pin"  ←→  "admin"  ←→  "manage_favorites"
+                               ←→  "manage_apps"  ←→  "app_picker"
 "home"  ←→  "applist"
 "home"  ←→  "photos"
 "home"  ←→  "favorites"
@@ -143,6 +163,7 @@ app/src/main/java/com/papy/launcher/
 2. PIN correct → `"admin"`
 3. "Retour" → `"home"`
 4. Admin → "Gérer les favoris" → `"manage_favorites"` → "Retour" → `"admin"`
+5. Admin → "Gérer les applis" → `"manage_apps"` → "Ajouter une appli" → `"app_picker"` → "Retour" → `"manage_apps"` → "Retour" → `"admin"`
 
 ### Préférences stockées (Prefs.kt → SharedPreferences `papy_prefs`)
 | Clé | Type | Défaut |
@@ -154,6 +175,7 @@ app/src/main/java/com/papy/launcher/
 | `home_button_enabled` | Boolean | true |
 | `shortcut_<ID>` | Boolean | true (par raccourci) |
 | `favorites_list` | String (JSON) | null (liste vide) |
+| `dynamic_apps_list` | String (JSON) | null (liste vide) |
 
 ### Section « Autorisations système » (admin)
 Boutons avec indicateurs d'état (pastille verte + coche si actif, pastille grise sinon) :
@@ -173,6 +195,15 @@ Boutons « Redemander » (boîte système runtime, fallback page d'infos appli s
 ### Section « Favoris » (admin)
 Bouton unique « Gérer les favoris » → navigue vers `ManageFavoritesScreen`. Si la permission `READ_CONTACTS` n'est pas accordée, un message d'avertissement s'affiche sous le bouton.
 
+### Section « Applis » (admin)
+Bouton unique « Gérer les applis » → navigue vers `ManageAppsScreen`.
+
+### Indicateur batterie (écran d'accueil)
+- Icône Material Battery (niveau dynamique : 0-5 barres) + pourcentage
+- Couleur : vert >30%, orange ≤30%, rouge ≤15% (pas d'icône éclair, même en charge)
+- Rafraîchi toutes les 30 secondes via `ACTION_BATTERY_CHANGED` sticky broadcast
+- Position : haut-droite, superposé à l'horloge (ne décentre pas l'horloge)
+
 ---
 
 ## Permissions requises
@@ -185,6 +216,7 @@ Bouton unique « Gérer les favoris » → navigue vers `ManageFavoritesScreen`.
 | `READ_MEDIA_IMAGES` (Android 13+) | Visionneur photos | Oui (multiPermission au démarrage) |
 | `READ_EXTERNAL_STORAGE` (Android ≤12) | Visionneur photos | Oui |
 | `READ_CONTACTS` | Favoris (lookupKey → photo/numéro/prénom) | Oui (à la demande, pas au démarrage) |
+| `QUERY_ALL_PACKAGES` | Visibilité de toutes les applis installées (AppPickerScreen) | Non (permission normal) |
 | `SYSTEM_ALERT_WINDOW` | Bouton Home flottant | Oui (manuel, Paramètres) |
 | `FOREGROUND_SERVICE` | HomeButtonService | Non |
 | `FOREGROUND_SERVICE_SPECIAL_USE` | HomeButtonService (Android 14+) | Non |
@@ -232,6 +264,7 @@ Bouton unique « Gérer les favoris » → navigue vers `ManageFavoritesScreen`.
 |---|---|---|
 | Swipe notifications non bloqué | AccessibilityService trop lent, immersive sticky recache mais ne bloque pas | Limitation Android sans root. Alternative : Device Owner + Lock Task Mode |
 | Bouton Home flottant peut disparaître | Android peut tuer le service foreground sous pression mémoire | Relancer l'app si besoin |
+| Bouton Home clignote avec applis système (ex: Paramètres) | `onWindowFocusChanged` transitoire lors du lancement d'applis système | Contournement : ne pas ajouter d'applis système comme tuiles dynamiques (cas non prévu pour papa) |
 | Pas d'icône d'appli perso | Icône Android par défaut | À faire |
 | `getActiveNotifications()` depuis l'activity | Ne marche que depuis le service | Contourné : service bind lui-même dans BadgeStore |
 | `LocalLifecycleOwner` déprécié | Déplacé vers `lifecycle-runtime-compose` (non ajouté au projet) | Warning bénin, fonctionne toujours |
@@ -242,6 +275,10 @@ Bouton unique « Gérer les favoris » → navigue vers `ManageFavoritesScreen`.
 |---|---|---|---|
 | Favoris vides | `getLookupUri(-1L, lookupKey)` générait une URI `.../lookup/<key>/-1` rejetée par le provider contacts (IllegalArgumentException) | Query directe sur `Contacts.CONTENT_URI` avec `WHERE LOOKUP_KEY = ?` | #1 ✅ |
 | Pas d'UI retirer favori | Conséquence du bug #1 : la liste admin était vide | Corrigé automatiquement avec #1 | #2 ✅ |
+| Kiosque bloque les applis dynamiques | `ALLOWED_PACKAGES` fixe ne incluait pas les applis ajoutées dynamiquement | `allowedPackages(context)` fusionne `BASE_ALLOWED_PACKAGES` + `Prefs.getDynamicApps` | — ✅ |
+| Bouton Home disparaît (onResume transitoire) | `onResume`/`onPause` transitoires lors du lancement d'applis | Déplacement de la gestion vers `onWindowFocusChanged` | — ✅ |
+| Liste applis incomplète (22 au lieu de 82) | Android 11+ restreint la visibilité des applis sans `QUERY_ALL_PACKAGES` | Ajout de `QUERY_ALL_PACKAGES` au manifeste | — ✅ |
+| Tuiles dynamiques ne remplissent pas le trou de la dernière rangée fixe | Deux boucles séparées (raccourcis fixes + applis dynamiques) chunked séparément | Fusion en une seule liste `HomeTile` (Fixed + Dynamic) avant chunking | — ✅ |
 
 ---
 
@@ -255,13 +292,15 @@ Bouton unique « Gérer les favoris » → navigue vers `ManageFavoritesScreen`.
 | `docs/handoff.md` | Ce fichier — état du projet, architecture, reprise |
 | `docs/superpowers/specs/2026-08-01-appareil-photo-prout-design.md` | Spec boutons Appareil photo + Prout |
 | `docs/superpowers/specs/2026-08-01-favoris-contacts-design.md` | Spec contacts favoris avec photo |
+| `docs/superpowers/specs/2026-08-02-tuiles-applis-dynamiques-design.md` | Spec tuiles d'applis dynamiques |
 | `docs/superpowers/plans/2026-08-01-favoris-contacts.md` | Plan d'implémentation favoris (7 tâches) |
+| `docs/superpowers/plans/2026-08-02-tuiles-applis-dynamiques.md` | Plan d'implémentation tuiles applis (7 tâches) |
 | `DESIGN.md` | Design system complet (couleurs, typo, layout, composants) |
 | `PRODUCT.md` | Document produit (plateforme, utilisateurs, principes) |
 
 ---
 
-## Évolutions de la session 2026-08-01 / 2026-08-02
+## Évolutions de la session 2026-08-01 / 2026-08-03
 
 | Évolution | Fichiers touchés | Détail |
 |---|---|---|
@@ -272,12 +311,14 @@ Bouton unique « Gérer les favoris » → navigue vers `ManageFavoritesScreen`.
 | Trigger admin 7 clics | `MainActivity.kt` | Remplace long appui 2s — 7 clics sur horloge dans 2s |
 | Toast kiosque + warning | `AdminScreen.kt` | Toast « Trouvez Papy Launcher » + warning rouge si kiosque on mais service inactif |
 | Boutons Appareil photo + Prout | `Shortcuts.kt`, `MainActivity.kt`, `ProutSound.kt`, `AndroidManifest.xml`, `strings.xml`, `DESIGN.md` | Spec + implémentation (caméra native + son synthétisé AudioTrack) |
-| Contacts favoris | `Shortcuts.kt`, `Prefs.kt`, `ContactsHelper.kt`, `FavoritesScreen.kt`, `MainActivity.kt`, `AdminScreen.kt`, `AndroidManifest.xml`, `strings.xml`, `DESIGN.md` | Spec + plan + implémentation. Fix bug affichage (query par LOOKUP_KEY). Gestion via écran dédié `ManageFavoritesScreen`. |
+| Contacts favoris | `Shortcuts.kt`, `Prefs.kt`, `ContactsHelper.kt`, `FavoritesScreen.kt`, `ManageFavoritesScreen.kt`, `MainActivity.kt`, `AdminScreen.kt`, `AndroidManifest.xml`, `strings.xml`, `DESIGN.md` | Spec + plan + implémentation. Fix bug affichage (query par LOOKUP_KEY). Gestion via écran dédié. |
+| Tuiles d'applis dynamiques | `DynamicApp.kt`, `ManageAppsScreen.kt`, `AppPickerScreen.kt`, `MainActivity.kt`, `AdminScreen.kt`, `PapyKioskService.kt`, `AndroidManifest.xml`, `DESIGN.md` | Spec + plan + implémentation. BigButton refactor (icône native Drawable + médaillon blanc). Kiosque liste blanche dynamique. HomeButton via onWindowFocusChanged. QUERY_ALL_PACKAGES. |
 | Réordonnancement des tuiles | `Shortcuts.kt` | Ordre : Appels, Favoris, SMS, WhatsApp, Mail, Photos, Applis, Appareil photo, Prout |
-| Grille fixe (taille des tuiles) | `MainActivity.kt` | `Spacer(weight 1f)` quand rangée incomplète — la dernière tuile ne s'étire pas |
+| Grille fusionnée | `MainActivity.kt` | `sealed class HomeTile` (Fixed + Dynamic) — une seule liste chunked par 2, les tuiles dynamiques remplissent le trou de la dernière rangée fixe |
 | Icône Favoris | `MainActivity.kt` | `Icons.Filled.Star` (était `null`) |
+| Indicateur batterie | `MainActivity.kt` | Icône Material Battery + pourcentage, couleur vert/orange/rouge, superposé haut-droite (ne décentre pas l'horloge) |
 | README complet | `README.md` | Présentation, features, install, compatibilité, architecture, principes |
-| Suppression branche feature | git | `feature/favoris-contacts` fusionnée dans `main` puis supprimée (local + remote) |
+| Suppression branches feature | git | `feature/favoris-contacts` et `feature/tuiles-applis-dynamiques` fusionnées dans `main` |
 
 ---
 
