@@ -448,13 +448,11 @@ fun ClockHeader(modifier: Modifier = Modifier) {
 @Composable
 fun BatteryIndicator(level: Int, isCharging: Boolean, modifier: Modifier = Modifier) {
     val batteryColor = when {
-        isCharging -> Color(0xFF2E7D32)
         level <= 15 -> Color(0xFFC62828)
         level <= 30 -> Color(0xFFEF6C00)
-        else -> Color(0xFF333333)
+        else -> Color(0xFF2E7D32)
     }
     val batteryIcon = when {
-        isCharging -> Icons.Filled.BatteryChargingFull
         level >= 90 -> Icons.Filled.BatteryFull
         level >= 60 -> Icons.Filled.Battery5Bar
         level >= 40 -> Icons.Filled.Battery4Bar
