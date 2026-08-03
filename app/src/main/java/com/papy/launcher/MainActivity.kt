@@ -77,6 +77,11 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.papy.launcher.ui.theme.PapyLauncherTheme
 
+sealed class HomeTile {
+    data class Fixed(val shortcut: Shortcut) : HomeTile()
+    data class Dynamic(val app: DynamicApp) : HomeTile()
+}
+
 class MainActivity : ComponentActivity() {
     private var pendingSosNumber: String? = null
 
@@ -281,80 +286,77 @@ fun HomeScreen(
                 )
         )
 
-        // Grille dynamique construite à partir des raccourcis activés
+        // Grille : fusion des raccourcis fixes + applis dynamiques, chunked par 2
         val enabledShortcuts = remember { Prefs.getEnabledShortcuts(context) }
-        val rows = enabledShortcuts.chunked(2)
-        for (rowShortcuts in rows) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                for (sc in rowShortcuts) {
-                    val badge = when (sc.id) {
-                        ShortcutId.APPELS -> missed
-                        ShortcutId.SMS -> smsBadge
-                        ShortcutId.WHATSAPP -> waBadge
-                        ShortcutId.MAIL -> mailBadge
-                        else -> 0
-                    }
-                    val action: (Context) -> Unit = when (sc.id) {
-                        ShortcutId.APPELS -> { ctx -> launchDialer(ctx) }
-                        ShortcutId.SMS -> { ctx -> launchSmsApp(ctx) }
-                        ShortcutId.WHATSAPP -> { ctx -> launchWhatsApp(ctx) }
-                        ShortcutId.MAIL -> { ctx -> launchMailApp(ctx) }
-                        ShortcutId.PHOTOS -> { ctx -> onPhotos() }
-                        ShortcutId.APPLIS -> { ctx -> onApplis() }
-                        ShortcutId.APPAREIL_PHOTO -> { ctx -> launchCamera(ctx) }
-                        ShortcutId.PROUT -> { ctx -> playFartSound(ctx) }
-                        ShortcutId.FAVORIS -> { ctx -> onFavorites() }
-                    }
-                    BigButton(
-                        label = stringResource(sc.labelRes),
-                        color = sc.color,
-                        icon = shortcutIcon(sc.id),
-                        badge = badge
-                    ) { action(context) }
-                }
-                if (rowShortcuts.size == 1) {
-                    Spacer(modifier = Modifier.weight(1f))
-                }
-            }
-        }
-
         val dynamicApps = remember { Prefs.getDynamicApps(context) }
-        val appRows = dynamicApps.chunked(2)
-        for (rowApps in appRows) {
+
+        val allTiles: List<HomeTile> = enabledShortcuts.map { HomeTile.Fixed(it) } +
+            dynamicApps.map { HomeTile.Dynamic(it) }
+        val rows = allTiles.chunked(2)
+        for (rowTiles in rows) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                for (app in rowApps) {
-                    val pm = context.packageManager
-                    val launchIntent = pm.getLaunchIntentForPackage(app.packageName)
-                    val appLabel = try {
-                        pm.getApplicationLabel(pm.getApplicationInfo(app.packageName, 0)).toString()
-                    } catch (e: Exception) {
-                        app.label
-                    }
-                    val appIcon = try {
-                        pm.getApplicationIcon(app.packageName)
-                    } catch (e: Exception) {
-                        null
-                    }
-                    BigButton(
-                        label = appLabel,
-                        color = Color(0xFF546E7A),
-                        drawableIcon = appIcon,
-                        badge = 0
-                    ) {
-                        if (launchIntent != null) {
-                            launchApp(context, app.packageName)
-                        } else {
-                            Toast.makeText(context, "$appLabel n'est plus installée", Toast.LENGTH_SHORT).show()
+                for (tile in rowTiles) {
+                    when (tile) {
+                        is HomeTile.Fixed -> {
+                            val sc = tile.shortcut
+                            val badge = when (sc.id) {
+                                ShortcutId.APPELS -> missed
+                                ShortcutId.SMS -> smsBadge
+                                ShortcutId.WHATSAPP -> waBadge
+                                ShortcutId.MAIL -> mailBadge
+                                else -> 0
+                            }
+                            val action: (Context) -> Unit = when (sc.id) {
+                                ShortcutId.APPELS -> { ctx -> launchDialer(ctx) }
+                                ShortcutId.SMS -> { ctx -> launchSmsApp(ctx) }
+                                ShortcutId.WHATSAPP -> { ctx -> launchWhatsApp(ctx) }
+                                ShortcutId.MAIL -> { ctx -> launchMailApp(ctx) }
+                                ShortcutId.PHOTOS -> { ctx -> onPhotos() }
+                                ShortcutId.APPLIS -> { ctx -> onApplis() }
+                                ShortcutId.APPAREIL_PHOTO -> { ctx -> launchCamera(ctx) }
+                                ShortcutId.PROUT -> { ctx -> playFartSound(ctx) }
+                                ShortcutId.FAVORIS -> { ctx -> onFavorites() }
+                            }
+                            BigButton(
+                                label = stringResource(sc.labelRes),
+                                color = sc.color,
+                                icon = shortcutIcon(sc.id),
+                                badge = badge
+                            ) { action(context) }
+                        }
+                        is HomeTile.Dynamic -> {
+                            val app = tile.app
+                            val pm = context.packageManager
+                            val launchIntent = pm.getLaunchIntentForPackage(app.packageName)
+                            val appLabel = try {
+                                pm.getApplicationLabel(pm.getApplicationInfo(app.packageName, 0)).toString()
+                            } catch (e: Exception) {
+                                app.label
+                            }
+                            val appIcon = try {
+                                pm.getApplicationIcon(app.packageName)
+                            } catch (e: Exception) {
+                                null
+                            }
+                            BigButton(
+                                label = appLabel,
+                                color = Color(0xFF546E7A),
+                                drawableIcon = appIcon,
+                                badge = 0
+                            ) {
+                                if (launchIntent != null) {
+                                    launchApp(context, app.packageName)
+                                } else {
+                                    Toast.makeText(context, "$appLabel n'est plus installée", Toast.LENGTH_SHORT).show()
+                                }
+                            }
                         }
                     }
                 }
-                if (rowApps.size == 1) {
+                if (rowTiles.size == 1) {
                     Spacer(modifier = Modifier.weight(1f))
                 }
             }
