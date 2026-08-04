@@ -37,6 +37,8 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.papy.launcher.ui.components.ScreenHeader
+import com.papy.launcher.ui.theme.PapyTextGray
+import com.papy.launcher.ui.theme.PapySurfaceMuted
 
 data class Photo(
     val id: Long,
@@ -102,7 +104,7 @@ fun PhotosScreen(
                     Text(
                         text = "Aucune photo trouvée",
                         fontSize = 22.sp,
-                        color = Color(0xFF666666)
+                        color = PapyTextGray
                     )
                 }
             } else {
@@ -139,7 +141,7 @@ fun PhotoThumb(
             .aspectRatio(1f)
             .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
-            .background(Color(0xFFEEEEEE))
+            .background(PapySurfaceMuted)
     ) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)

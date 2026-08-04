@@ -25,6 +25,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.papy.launcher.ui.theme.PapyBlue
+import com.papy.launcher.ui.theme.PapyBorder
+import com.papy.launcher.ui.theme.PapyRed
+import com.papy.launcher.ui.theme.PapySurfaceMuted
+import com.papy.launcher.ui.theme.PapyTextGrayAlt
 
 @Composable
 fun PinScreen(
@@ -47,14 +52,14 @@ fun PinScreen(
             text = "Mode Admin",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1A237E)
+            color = PapyBlue
         )
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(
             text = "Entrez le code",
             fontSize = 22.sp,
-            color = Color(0xFF555555)
+            color = PapyTextGrayAlt
         )
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -68,7 +73,7 @@ fun PinScreen(
                     modifier = Modifier
                         .size(24.dp)
                         .clip(CircleShape)
-                        .background(if (filled) Color(0xFF1A237E) else Color(0xFFCCCCCC))
+                        .background(if (filled) PapyBlue else PapyBorder)
                 )
             }
         }
@@ -78,7 +83,7 @@ fun PinScreen(
             Text(
                 text = "Code incorrect",
                 fontSize = 20.sp,
-                color = Color(0xFFC62828),
+                color = PapyRed,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -155,7 +160,7 @@ fun PinKey(
         modifier = Modifier
             .size(80.dp)
             .clip(CircleShape)
-            .background(if (isAction) Color(0xFFEEEEEE) else Color(0xFF1A237E))
+            .background(if (isAction) PapySurfaceMuted else PapyBlue)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -163,7 +168,7 @@ fun PinKey(
             text = label,
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
-            color = if (isAction) Color(0xFFC62828) else Color.White
+            color = if (isAction) PapyRed else Color.White
         )
     }
 }

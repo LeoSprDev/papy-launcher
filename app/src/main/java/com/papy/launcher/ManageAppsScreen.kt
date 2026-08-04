@@ -1,6 +1,12 @@
 package com.papy.launcher
 
 import com.papy.launcher.ui.components.ScreenHeader
+import com.papy.launcher.ui.theme.PapyRed
+import com.papy.launcher.ui.theme.PapySurfaceLight
+import com.papy.launcher.ui.theme.PapySurfaceMuted
+import com.papy.launcher.ui.theme.PapyTextDark
+import com.papy.launcher.ui.theme.PapyTextGray
+import com.papy.launcher.ui.theme.PapyTextLight
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -73,7 +79,7 @@ fun ManageAppsScreen(
             Text(
                 text = "Aucune appli. Touchez « Ajouter une appli ».",
                 fontSize = 18.sp,
-                color = Color(0xFF666666)
+                color = PapyTextGray
             )
         } else {
             for (app in apps) {
@@ -103,7 +109,7 @@ fun ManageAppsScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFFF5F5F5))
+                        .background(PapySurfaceLight)
                         .padding(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -112,7 +118,7 @@ fun ManageAppsScreen(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFEEEEEE)),
+                                .background(PapySurfaceMuted),
                             contentAlignment = Alignment.Center
                         ) {
                             AppIcon(icon = appIcon, size = 32)
@@ -122,7 +128,7 @@ fun ManageAppsScreen(
                             modifier = Modifier
                                 .size(40.dp)
                                 .clip(CircleShape)
-                                .background(Color(0xFFEEEEEE))
+                                .background(PapySurfaceMuted)
                         )
                     }
                     Spacer(modifier = Modifier.width(12.dp))
@@ -132,27 +138,27 @@ fun ManageAppsScreen(
                                 text = appLabel,
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF333333)
+                                color = PapyTextDark
                             )
                         } else {
                             Text(
                                 text = "$appLabel (désinstallée)",
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFFC62828)
+                                color = PapyRed
                             )
                         }
                         Text(
                             text = app.packageName,
                             fontSize = 16.sp,
-                            color = Color(0xFF888888)
+                            color = PapyTextLight
                         )
                     }
                     Text(
                         text = "Retirer",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFFC62828),
+                        color = PapyRed,
                         modifier = Modifier.clickable {
                             Prefs.removeDynamicApp(context, app.packageName)
                             apps = Prefs.getDynamicApps(context)

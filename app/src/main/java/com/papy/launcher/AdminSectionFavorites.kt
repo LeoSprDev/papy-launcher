@@ -1,5 +1,6 @@
 package com.papy.launcher
 
+import com.papy.launcher.ui.theme.PapyTextGray
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -22,7 +23,7 @@ internal fun AdminSectionFavorites(
         Text(
             text = "Autorisez d'abord les contacts (section Permissions ci-dessous).",
             fontSize = 14.sp,
-            color = Color(0xFF666666),
+            color = PapyTextGray,
             modifier = Modifier.padding(top = 8.dp)
         )
     }

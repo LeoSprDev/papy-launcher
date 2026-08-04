@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.papy.launcher.ui.theme.PapyBlue
 
 @Composable
 fun ScreenHeader(
@@ -32,7 +33,7 @@ fun ScreenHeader(
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(16.dp))
-                .background(Color(0xFF1A237E))
+                .background(PapyBlue)
                 .clickable { onBack() }
                 .padding(horizontal = 24.dp, vertical = 16.dp)
         ) {
@@ -48,7 +49,7 @@ fun ScreenHeader(
             text = title,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1A237E)
+            color = PapyBlue
         )
     }
 }

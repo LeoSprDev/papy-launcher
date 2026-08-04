@@ -1,5 +1,7 @@
 package com.papy.launcher
 
+import com.papy.launcher.ui.theme.PapyRed
+import com.papy.launcher.ui.theme.PapyTextGray
 import android.widget.Toast
 import android.content.Intent
 import android.provider.Settings
@@ -64,7 +66,7 @@ internal fun AdminSectionKiosk(
     Text(
         text = "Empêche de quitter le launcher par erreur (swipe, récents, etc.). À activer une fois dans les paramètres d'accessibilité.",
         fontSize = 16.sp,
-        color = Color(0xFF666666),
+        color = PapyTextGray,
         modifier = Modifier.padding(top = 8.dp)
     )
     if (kioskEnabled && !kioskRunning) {
@@ -72,7 +74,7 @@ internal fun AdminSectionKiosk(
             text = "⚠ À activer dans les paramètres d'accessibilité (Papy Launcher n'est pas encore actif)",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFFC62828),
+            color = PapyRed,
             modifier = Modifier.padding(top = 8.dp)
         )
     }

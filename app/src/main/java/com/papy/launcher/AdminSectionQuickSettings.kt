@@ -1,5 +1,6 @@
 package com.papy.launcher
 
+import com.papy.launcher.ui.theme.PapyTextGray
 import android.content.Intent
 import android.provider.Settings
 import androidx.compose.foundation.layout.Spacer
@@ -85,6 +86,6 @@ internal fun AdminSectionQuickSettings(
     Text(
         text = "Pour modifier la luminosité, activez « Modification des réglages » dans la section Autorisations",
         fontSize = 14.sp,
-        color = Color(0xFF666666)
+        color = PapyTextGray
     )
 }
