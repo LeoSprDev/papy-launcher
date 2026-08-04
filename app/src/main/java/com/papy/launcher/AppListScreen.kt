@@ -1,5 +1,6 @@
 package com.papy.launcher
 
+import com.papy.launcher.ui.components.ScreenHeader
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -7,8 +8,6 @@ import android.graphics.drawable.Drawable
 import android.widget.ImageView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -70,32 +69,7 @@ fun AppListScreen(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF1A237E))
-                    .clickable { onBack() }
-                    .padding(horizontal = 24.dp, vertical = 16.dp)
-            ) {
-                Text(
-                    text = "Retour",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = "Applications",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A237E)
-            )
-        }
+        ScreenHeader(title = "Applications", onBack = onBack)
         Spacer(modifier = Modifier.height(16.dp))
 
         for (app in apps) {

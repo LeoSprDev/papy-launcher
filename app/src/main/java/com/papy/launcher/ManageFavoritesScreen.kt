@@ -1,5 +1,6 @@
 package com.papy.launcher
 
+import com.papy.launcher.ui.components.ScreenHeader
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -108,32 +109,7 @@ fun ManageFavoritesScreen(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF1A237E))
-                    .clickable { onBack() }
-                    .padding(horizontal = 24.dp, vertical = 16.dp)
-            ) {
-                Text(
-                    text = "Retour",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = "Gérer les favoris",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A237E)
-            )
-        }
+        ScreenHeader(title = "Gérer les favoris", onBack = onBack)
         Spacer(modifier = Modifier.height(16.dp))
 
         if (!contactsGranted) {
