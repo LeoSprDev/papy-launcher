@@ -1,5 +1,6 @@
 package com.papy.launcher
 
+import com.papy.launcher.ui.components.rememberOnResume
 import com.papy.launcher.ui.theme.PapyBlue
 import android.Manifest
 import android.content.Intent
@@ -51,22 +52,15 @@ fun AdminScreen(
     var contactsGranted by remember { mutableStateOf(isGranted(context, Manifest.permission.READ_CONTACTS)) }
 
     // Re-vérifie les états quand l'admin revient au premier plan (après un Intent Settings)
-    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
-    val lifecycleObserver = androidx.lifecycle.LifecycleEventObserver { _, event ->
-        if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
-            notifListenerEnabled = isNotifListenerEnabled(context)
-            overlayEnabled = Settings.canDrawOverlays(context)
-            kioskRunning = PapyKioskService.isRunning(context)
-            writeSettingsEnabled = Settings.System.canWrite(context)
-            callPhoneGranted = isGranted(context, Manifest.permission.CALL_PHONE)
-            callLogGranted = isGranted(context, Manifest.permission.READ_CALL_LOG)
-            photosGranted = isPhotosPermissionGranted(context)
-            contactsGranted = isGranted(context, Manifest.permission.READ_CONTACTS)
-        }
-    }
-    androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
-        lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(lifecycleObserver) }
+    rememberOnResume {
+        notifListenerEnabled = isNotifListenerEnabled(context)
+        overlayEnabled = Settings.canDrawOverlays(context)
+        kioskRunning = PapyKioskService.isRunning(context)
+        writeSettingsEnabled = Settings.System.canWrite(context)
+        callPhoneGranted = isGranted(context, Manifest.permission.CALL_PHONE)
+        callLogGranted = isGranted(context, Manifest.permission.READ_CALL_LOG)
+        photosGranted = isPhotosPermissionGranted(context)
+        contactsGranted = isGranted(context, Manifest.permission.READ_CONTACTS)
     }
 
     Column(

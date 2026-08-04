@@ -1,6 +1,7 @@
 package com.papy.launcher
 
 import com.papy.launcher.ui.components.ScreenHeader
+import com.papy.launcher.ui.components.rememberOnResume
 import com.papy.launcher.ui.theme.PapyRed
 import com.papy.launcher.ui.theme.PapySurfaceLight
 import com.papy.launcher.ui.theme.PapySurfaceMuted
@@ -25,7 +26,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,14 +33,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 
 @Composable
 fun ManageAppsScreen(
@@ -50,15 +46,8 @@ fun ManageAppsScreen(
     val context = LocalContext.current
     var apps by remember { mutableStateOf(Prefs.getDynamicApps(context)) }
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val lifecycleObserver = LifecycleEventObserver { _, event ->
-        if (event == Lifecycle.Event.ON_RESUME) {
-            apps = Prefs.getDynamicApps(context)
-        }
-    }
-    DisposableEffect(lifecycleOwner) {
-        lifecycleOwner.lifecycle.addObserver(lifecycleObserver)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(lifecycleObserver) }
+    rememberOnResume {
+        apps = Prefs.getDynamicApps(context)
     }
 
     Column(
