@@ -37,6 +37,7 @@ fun Prefs.addDynamicApp(context: Context, packageName: String, label: String) {
         })
     }
     prefs(context).edit().putString(KEY_DYNAMIC_APPS, arr.toString()).apply()
+    PapyKioskService.invalidateAllowedPackagesCache()
 }
 
 fun Prefs.removeDynamicApp(context: Context, packageName: String) {
@@ -51,4 +52,5 @@ fun Prefs.removeDynamicApp(context: Context, packageName: String) {
         })
     }
     prefs(context).edit().putString(KEY_DYNAMIC_APPS, arr.toString()).apply()
+    PapyKioskService.invalidateAllowedPackagesCache()
 }

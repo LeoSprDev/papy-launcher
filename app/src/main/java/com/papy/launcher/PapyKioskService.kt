@@ -38,9 +38,19 @@ class PapyKioskService : AccessibilityService() {
             "com.android.contacts"
         )
 
+        @Volatile
+        private var cachedAllowedPackages: Set<String>? = null
+
         fun allowedPackages(context: Context): Set<String> {
+            cachedAllowedPackages?.let { return it }
             val dynamic = Prefs.getDynamicApps(context).map { it.packageName }.toSet()
-            return BASE_ALLOWED_PACKAGES + dynamic
+            val result = BASE_ALLOWED_PACKAGES + dynamic
+            cachedAllowedPackages = result
+            return result
+        }
+
+        fun invalidateAllowedPackagesCache() {
+            cachedAllowedPackages = null
         }
 
         fun isRunning(context: Context): Boolean {
