@@ -1,18 +1,8 @@
 package com.papy.launcher
 
-import com.papy.launcher.ui.theme.PapyBlue
-import com.papy.launcher.ui.theme.PapyBorder
-import com.papy.launcher.ui.theme.PapyGreen
-import com.papy.launcher.ui.theme.PapyGreenLight
-import com.papy.launcher.ui.theme.PapyRedLight
-import com.papy.launcher.ui.theme.PapyTextBlueGray
-import com.papy.launcher.ui.theme.PapyTextDark
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.os.Build
-import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -42,6 +32,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.papy.launcher.ui.theme.PapyBlue
+import com.papy.launcher.ui.theme.PapyBorder
+import com.papy.launcher.ui.theme.PapyGreen
+import com.papy.launcher.ui.theme.PapyGreenLight
+import com.papy.launcher.ui.theme.PapyRedLight
+import com.papy.launcher.ui.theme.PapyTextBlueGray
+import com.papy.launcher.ui.theme.PapyTextDark
 
 @Composable
 fun SectionTitle(text: String) {
@@ -159,27 +156,9 @@ fun PermissionButton(
             .background(PapyBlue)
             .clickable {
                 if (granted) {
-                    Toast.makeText(
-                        context,
-                        "Onglet « Permissions » → désactivez « $label »",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = Uri.parse("package:${context.packageName}")
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    }
-                    context.startActivity(intent)
+                    openAppDetailsSettings(context, "désactivez « $label »")
                 } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                    Toast.makeText(
-                        context,
-                        "Onglet « Permissions » → activez « $label »",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = Uri.parse("package:${context.packageName}")
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                    }
-                    context.startActivity(intent)
+                    openAppDetailsSettings(context, "activez « $label »")
                 } else {
                     val canRequest = activity?.let {
                         !it.shouldShowRequestPermissionRationale(permission)
@@ -187,16 +166,7 @@ fun PermissionButton(
                     if (canRequest) {
                         activityResult.launch(permission)
                     } else {
-                        Toast.makeText(
-                            context,
-                            "Onglet « Permissions » → activez « $label »",
-                            Toast.LENGTH_LONG
-                        ).show()
-                        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                            data = Uri.parse("package:${context.packageName}")
-                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                        }
-                        context.startActivity(intent)
+                        openAppDetailsSettings(context, "activez « $label »")
                     }
                 }
             }
