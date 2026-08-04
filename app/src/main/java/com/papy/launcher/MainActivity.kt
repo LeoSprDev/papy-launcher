@@ -123,6 +123,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         requestEssentialPermissions()
         hideSystemBars()
+        if (Prefs.isHomeButtonEnabled(this)) {
+            startHomeButtonService()
+        }
         setContent {
             PapyLauncherTheme {
                 Surface(modifier = Modifier.fillMaxSize(), color = Color.White) {
@@ -164,8 +167,13 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun stopHomeButtonService() {
-        stopService(Intent(this, HomeButtonService::class.java))
+    private fun sendHomeButtonCommand(action: String) {
+        val intent = Intent(this, HomeButtonService::class.java).apply { setAction(action) }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
+        }
     }
 
     private fun hideSystemBars() {
@@ -191,10 +199,10 @@ class MainActivity : ComponentActivity() {
             hideSystemBars()
         }
         if (hasFocus) {
-            stopHomeButtonService()
+            sendHomeButtonCommand(HomeButtonService.ACTION_HIDE)
         } else {
             if (Prefs.isHomeButtonEnabled(this)) {
-                startHomeButtonService()
+                sendHomeButtonCommand(HomeButtonService.ACTION_SHOW)
             }
         }
     }

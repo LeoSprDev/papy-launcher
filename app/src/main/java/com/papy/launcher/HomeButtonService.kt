@@ -19,6 +19,12 @@ class HomeButtonService : Service() {
 
     private var windowManager: WindowManager? = null
     private var homeButton: View? = null
+    private var isShowing = false
+
+    companion object {
+        const val ACTION_SHOW = "com.papy.launcher.action.SHOW_HOME_BUTTON"
+        const val ACTION_HIDE = "com.papy.launcher.action.HIDE_HOME_BUTTON"
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -27,9 +33,17 @@ class HomeButtonService : Service() {
         startAsForeground()
         if (!canDrawOverlays()) {
             Toast.makeText(this, "Autorisation d'affichage au-dessus des autres applis requise", Toast.LENGTH_LONG).show()
+            stopSelf()
             return
         }
-        showHomeButton()
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        when (intent?.action) {
+            ACTION_SHOW -> showHomeButton()
+            ACTION_HIDE -> hideHomeButton()
+        }
+        return START_STICKY
     }
 
     private fun startAsForeground() {
@@ -66,6 +80,7 @@ class HomeButtonService : Service() {
     }
 
     private fun showHomeButton() {
+        if (isShowing) return
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 
         val button = Button(this).apply {
@@ -100,16 +115,23 @@ class HomeButtonService : Service() {
 
         try {
             windowManager?.addView(button, params)
+            isShowing = true
         } catch (e: Exception) {
             Toast.makeText(this, "Impossible d'afficher le bouton Accueil", Toast.LENGTH_SHORT).show()
         }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    private fun hideHomeButton() {
+        if (!isShowing) return
         homeButton?.let {
             try { windowManager?.removeView(it) } catch (_: Exception) {}
         }
         homeButton = null
+        isShowing = false
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        hideHomeButton()
     }
 }
