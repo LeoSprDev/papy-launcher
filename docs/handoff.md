@@ -1,6 +1,6 @@
 # Papy Launcher — Handoff
 
-**Date :** 2026-08-03
+**Date :** 2026-08-04
 **Repo GitHub :** https://github.com/LeoSprDev/papy-launcher
 **APK debug :** `app/build/outputs/apk/debug/app-debug.apk` (~19 Mo)
 
@@ -125,12 +125,24 @@ APK → `app/build/outputs/apk/debug/app-debug.apk` (~19 Mo)
 
 ```
 app/src/main/java/com/papy/launcher/
-├── MainActivity.kt              — Activity principale, navigation 9 écrans, UI accueil, lancement applis, permissions runtime, trigger admin (7 clics horloge), grille fusionnée (fixes + dynamiques), batterie, HomeTile sealed class
-├── Prefs.kt                    — SharedPreferences (PIN, SOS, kiosque, home button, raccourcis, favoris JSON, dynamic apps JSON)
+├── MainActivity.kt              — Activity principale, navigation 9 écrans (sealed class Screen), UI accueil, lancement applis, permissions runtime, trigger admin (7 clics horloge), grille fusionnée (fixes + dynamiques), batterie, HomeTile sealed class
+├── Screen.kt                    — sealed class Screen (navigation type-safe : Home, Pin, Admin, ManageFavorites, ManageApps, AppPicker, AppList, Photos, Favorites)
+├── Prefs.kt                     — SharedPreferences (PIN, SOS, kiosque, home button, raccourcis, favoris JSON, dynamic apps JSON)
 ├── Shortcuts.kt                — Modèle de données des raccourcis (enum ShortcutId 9 entrées + data class Shortcut)
 ├── DynamicApp.kt               — Data class DynamicApp + helpers Prefs (getDynamicApps, addDynamicApp, removeDynamicApp)
 ├── PinScreen.kt                — Écran saisie PIN (pavé numérique grand)
-├── AdminScreen.kt              — Écran admin (SOS, PIN, kiosque, raccourcis, autorisations, permissions, favoris, applis, réglages rapides, luminosité) — scrollable
+├── AdminScreen.kt              — Écran admin composeur (state hoisting + lifecycle observer + orchestration des sections). ~257 lignes (était 732).
+├── AdminButtons.kt             — Composants UI admin réutilisables (SectionTitle, AdminButton, AdminLinkButton, PermissionButton)
+├── AdminSectionSos.kt           — Section SOS (switch afficher + champ numéro)
+├── AdminSectionPin.kt           — Section changement PIN
+├── AdminSectionKiosk.kt         — Section mode kiosque (switch + warning + redirect accessibilité)
+├── AdminSectionShortcuts.kt     — Section raccourcis affichés (boucle sur Shortcuts.all)
+├── AdminSectionSystemPermissions.kt — Section autorisations système (5 AdminLinkButton via callbacks)
+├── AdminSectionAppPermissions.kt — Section permissions runtime (4 PermissionButton)
+├── AdminSectionFavorites.kt     — Section favoris (bouton + warning contacts)
+├── AdminSectionApps.kt         — Section applis (bouton gérer)
+├── AdminSectionQuickSettings.kt — Section réglages rapides (5 boutons + slider luminosité)
+├── Permissions.kt              — Helpers permissions (isGranted, isPhotosPermissionGranted, isNotifListenerEnabled, isDefaultLauncher) — internal
 ├── ManageFavoritesScreen.kt    — Écran dédié gestion favoris (ajouter via picker contacts, retirer, liste avec photo + nom + numéro)
 ├── ManageAppsScreen.kt         — Écran dédié gestion applis dynamiques (ajouter/retirer, détection désinstallée)
 ├── AppPickerScreen.kt          — Écran de sélection d'applis (liste des applis installées, tap = ajout)
@@ -143,27 +155,31 @@ app/src/main/java/com/papy/launcher/
 ├── MissedCalls.kt               — Compteur appels manqués (query CallLog)
 ├── PapyKioskService.kt         — AccessibilityService mode kiosque (liste blanche de base + applis dynamiques)
 ├── HomeButtonService.kt         — Service foreground bouton Home flottant (WindowManager overlay, centre-droite)
+├── ui/components/
+│   └── ScreenHeader.kt          — Header réutilisable (bouton Retour bleu + titre 28sp) — utilisé par 6 écrans
 └── ui/theme/
     ├── Theme.kt                 — Thème clair forcé
-    ├── Color.kt                 — Couleurs
+    ├── Color.kt                 — Couleurs (constantes Papy* + Material3 Purple/Pink pour Theme.kt)
     └── Type.kt                  — Typographie
 ```
 
 ### Navigation (AppNavigation dans MainActivity)
 ```
-"home"  ←→  "pin"  ←→  "admin"  ←→  "manage_favorites"
-                               ←→  "manage_apps"  ←→  "app_picker"
-"home"  ←→  "applist"
-"home"  ←→  "photos"
-"home"  ←→  "favorites"
+Screen.Home  ←→  Screen.Pin  ←→  Screen.Admin  ←→  Screen.ManageFavorites
+                                          ←→  Screen.ManageApps  ←→  Screen.AppPicker
+Screen.Home  ←→  Screen.AppList
+Screen.Home  ←→  Screen.Photos
+Screen.Home  ←→  Screen.Favorites
 ```
 
+> Navigation type-safe via `sealed class Screen` (Screen.kt). Le `when` dans `AppNavigation()` est exhaustif — le compilateur vérifie tous les cas, plus de string literals.
+
 ### Flux du mode admin
-1. 7 clics sur l'horloge (dans les 2 secondes) → `"pin"`
-2. PIN correct → `"admin"`
-3. "Retour" → `"home"`
-4. Admin → "Gérer les favoris" → `"manage_favorites"` → "Retour" → `"admin"`
-5. Admin → "Gérer les applis" → `"manage_apps"` → "Ajouter une appli" → `"app_picker"` → "Retour" → `"manage_apps"` → "Retour" → `"admin"`
+1. 7 clics sur l'horloge (dans les 2 secondes) → `Screen.Pin`
+2. PIN correct → `Screen.Admin`
+3. "Retour" → `Screen.Home`
+4. Admin → "Gérer les favoris" → `Screen.ManageFavorites` → "Retour" → `Screen.Admin`
+5. Admin → "Gérer les applis" → `Screen.ManageApps` → "Ajouter une appli" → `Screen.AppPicker` → "Retour" → `Screen.ManageApps` → "Retour" → `Screen.Admin`
 
 ### Préférences stockées (Prefs.kt → SharedPreferences `papy_prefs`)
 | Clé | Type | Défaut |
@@ -319,6 +335,38 @@ Bouton unique « Gérer les applis » → navigue vers `ManageAppsScreen`.
 | Indicateur batterie | `MainActivity.kt` | Icône Material Battery + pourcentage, couleur vert/orange/rouge, superposé haut-droite (ne décentre pas l'horloge) |
 | README complet | `README.md` | Présentation, features, install, compatibilité, architecture, principes |
 | Suppression branches feature | git | `feature/favoris-contacts` et `feature/tuiles-applis-dynamiques` fusionnées dans `main` |
+
+---
+
+## Évolutions de la session 2026-08-04 — Refactoring thermo-nucléaire
+
+Audit de qualité code sévère, puis refactoring parallèle (4 agents) ciblant les points 1, 2, 3 et 6 de l'audit. Build vérifié vert après intégration.
+
+| Évolution | Fichiers touchés | Détail |
+|---|---|---|
+| Header écran réutilisable | `ui/components/ScreenHeader.kt` (nouveau), `ManageFavoritesScreen.kt`, `ManageAppsScreen.kt`, `AppListScreen.kt`, `AppPickerScreen.kt`, `PhotosScreen.kt`, `FavoritesScreen.kt` | Extrait `ScreenHeader(title, onBack)` — 6 copies du header "Retour + titre" supprimées. Unification via `Spacer.weight(1f)` (titre poussé à droite). |
+| Navigation type-safe | `Screen.kt` (nouveau), `MainActivity.kt` | `sealed class Screen` (9 object singletons) remplace les string literals. `when` exhaustif dans `AppNavigation()` — le compilateur valide tous les cas. |
+| Constantes couleurs | `ui/theme/Color.kt` | 14 constantes `Papy*` définies (`PapyBlue`, `PapyRed`, `PapyTextDark`, `PapyTextGray`, `PapyTextGrayAlt`, `PapyTextLight`, `PapyTextBlueGray`, `PapySurfaceLight`, `PapySurfaceMuted`, `PapyBorder`, `PapyGreen`, `PapyGreenLight`, `PapyRedLight`, `PapyOrange`). Couleurs Material3 (`Purple80/Pink40`) conservées pour `Theme.kt`. **Usages pas encore remplacés** — les `Color(0xFF...)` hardcodés restent dans le code (sweep à faire). |
+| Split `AdminScreen.kt` | `AdminScreen.kt` (732 → 257 lignes), `AdminButtons.kt`, `AdminSectionSos.kt`, `AdminSectionPin.kt`, `AdminSectionKiosk.kt`, `AdminSectionShortcuts.kt`, `AdminSectionSystemPermissions.kt`, `AdminSectionAppPermissions.kt`, `AdminSectionFavorites.kt`, `AdminSectionApps.kt`, `AdminSectionQuickSettings.kt`, `Permissions.kt` | 10 sections extraites en composables `internal` avec state hoisting (params + callbacks). Composants UI partagés (`SectionTitle`, `AdminButton`, `AdminLinkButton`, `PermissionButton`) dans `AdminButtons.kt`. Helpers permissions (`isGranted`, `isPhotosPermissionGranted`, `isNotifListenerEnabled`, `isDefaultLauncher`) dans `Permissions.kt` (`internal`). Lifecycle observer et state hoisting restent dans `AdminScreen` (orchestrateur). Couleurs hardcodées conservées (sweep à faire). |
+
+### Conflits inter-agents résolus à la main
+- Agent `Color.kt` avait supprimé `Purple80/PurpleGrey80/Pink80/Purple40/PurpleGrey40/Pink40` que `Theme.kt` référence → restaurées
+- Agent `ScreenHeader` avait supprimé l'import `sp` de `PhotosScreen.kt` à tort (le `fontSize = 22.sp` du texte "Aucune photo trouvée" en avait encore besoin) → restauré
+
+### Points d'audit thermo-nucléaire non traités (backlog)
+Ces points ont été identifiés lors de l'audit mais pas traités cette session :
+- Extraire `HomeTile`, `shortcutIcon`, `launchXxx` hors de `MainActivity.kt` (item 5)
+- Helper `rememberOnResume` pour supprimer 3 copies du lifecycle observer (item 4)
+- `Permissions.kt` simplifié + `PermissionButton` allégé (item 7)
+- Cache `allowedPackages()` dans `PapyKioskService` (item 8)
+- Receiver batterie unique au lieu du polling 30s (item 9)
+- `PinScreen.trySubmit()` local (item 10)
+- `DynamicApp` membres de `Prefs` (cohérence avec favoris) (item 11)
+- Fix bug `AdminLinkButton` fond identique + supprimer `launchSos` mort + `onResume/onPause` vides (item 12)
+- Bug `requestSosCall` race condition (3.1)
+- `loadInstalledApps` hors main thread (3.8)
+- `PapyKioskService.enabled` mutable global (3.4)
+- Couleurs hardcodées → remplacer par les constantes `Papy*` (sweep post-Color.kt)
 
 ---
 
