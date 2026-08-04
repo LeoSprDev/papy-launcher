@@ -47,6 +47,7 @@ import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -389,8 +390,14 @@ fun ClockHeader(modifier: Modifier = Modifier) {
     LaunchedEffect(Unit) {
         while (true) {
             currentTime = System.currentTimeMillis()
-            val intent = context.registerReceiver(null, android.content.IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-            if (intent != null) {
+            delay(30000L)
+        }
+    }
+
+    DisposableEffect(Unit) {
+        val receiver = object : android.content.BroadcastReceiver() {
+            override fun onReceive(ctx: android.content.Context?, intent: android.content.Intent?) {
+                intent ?: return
                 val level = intent.getIntExtra(android.os.BatteryManager.EXTRA_LEVEL, -1)
                 val scale = intent.getIntExtra(android.os.BatteryManager.EXTRA_SCALE, -1)
                 if (level >= 0 && scale > 0) {
@@ -400,7 +407,10 @@ fun ClockHeader(modifier: Modifier = Modifier) {
                 isCharging = status == android.os.BatteryManager.BATTERY_STATUS_CHARGING ||
                     status == android.os.BatteryManager.BATTERY_STATUS_FULL
             }
-            delay(30000L)
+        }
+        context.registerReceiver(receiver, android.content.IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        onDispose {
+            context.unregisterReceiver(receiver)
         }
     }
     val timeStr = remember(currentTime) {
