@@ -1,5 +1,12 @@
 package com.papy.launcher
 
+import com.papy.launcher.ui.theme.PapyBlue
+import com.papy.launcher.ui.theme.PapyBorder
+import com.papy.launcher.ui.theme.PapyGreen
+import com.papy.launcher.ui.theme.PapyGreenLight
+import com.papy.launcher.ui.theme.PapyRedLight
+import com.papy.launcher.ui.theme.PapyTextBlueGray
+import com.papy.launcher.ui.theme.PapyTextDark
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -42,7 +49,7 @@ fun SectionTitle(text: String) {
         text = text,
         fontSize = 24.sp,
         fontWeight = FontWeight.Bold,
-        color = Color(0xFF333333),
+        color = PapyTextDark,
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 12.dp)
@@ -59,7 +66,7 @@ fun AdminButton(
             .fillMaxWidth()
             .height(56.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFF1A237E))
+            .background(PapyBlue)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -85,7 +92,7 @@ fun AdminLinkButton(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(if (active) Color(0xFF1A237E) else Color(0xFF1A237E))
+            .background(if (active) PapyBlue else PapyTextBlueGray)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -94,7 +101,7 @@ fun AdminLinkButton(
             modifier = Modifier
                 .size(24.dp)
                 .clip(CircleShape)
-                .background(if (active) Color(0xFF2E7D32) else Color(0xFFCCCCCC)),
+                .background(if (active) PapyGreen else PapyBorder),
             contentAlignment = Alignment.Center
         ) {
             if (active) {
@@ -117,14 +124,14 @@ fun AdminLinkButton(
             Text(
                 text = hint,
                 fontSize = 14.sp,
-                color = Color(0xFFCCCCCC)
+                color = PapyBorder
             )
         }
         Text(
             text = if (active) "Activé" else "À activer",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            color = if (active) Color(0xFF81C784) else Color(0xFFFFCDD2)
+            color = if (active) PapyGreenLight else PapyRedLight
         )
     }
 }
@@ -149,7 +156,7 @@ fun PermissionButton(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFF1A237E))
+            .background(PapyBlue)
             .clickable {
                 if (granted) {
                     Toast.makeText(
@@ -200,7 +207,7 @@ fun PermissionButton(
             modifier = Modifier
                 .size(24.dp)
                 .clip(CircleShape)
-                .background(if (granted) Color(0xFF2E7D32) else Color(0xFFCCCCCC)),
+                .background(if (granted) PapyGreen else PapyBorder),
             contentAlignment = Alignment.Center
         ) {
             if (granted) {
@@ -224,7 +231,7 @@ fun PermissionButton(
             text = if (granted) "Accordée" else "À accorder",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
-            color = if (granted) Color(0xFF81C784) else Color(0xFFFFCDD2)
+            color = if (granted) PapyGreenLight else PapyRedLight
         )
     }
 }

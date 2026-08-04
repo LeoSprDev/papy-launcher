@@ -38,8 +38,6 @@ class PapyKioskService : AccessibilityService() {
             "com.android.contacts"
         )
 
-        var enabled = false
-
         fun allowedPackages(context: Context): Set<String> {
             val dynamic = Prefs.getDynamicApps(context).map { it.packageName }.toSet()
             return BASE_ALLOWED_PACKAGES + dynamic
@@ -55,7 +53,7 @@ class PapyKioskService : AccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        if (!enabled) return
+        if (!Prefs.isKioskEnabled(this)) return
         if (event == null) return
 
         val pkg = event.packageName?.toString() ?: return

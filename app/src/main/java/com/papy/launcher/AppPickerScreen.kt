@@ -10,19 +10,29 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.papy.launcher.ui.components.ScreenHeader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun AppPickerScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val apps = remember { loadInstalledApps(context) }
-    val existingApps = remember { Prefs.getDynamicApps(context).map { it.packageName }.toSet() }
+    var apps by remember { mutableStateOf<List<AppInfo>>(emptyList()) }
+    var existingApps by remember { mutableStateOf<Set<String>>(emptySet()) }
+    LaunchedEffect(Unit) {
+        apps = withContext(Dispatchers.Default) { loadInstalledApps(context) }
+        existingApps = Prefs.getDynamicApps(context).map { it.packageName }.toSet()
+    }
 
     Column(
         modifier = Modifier

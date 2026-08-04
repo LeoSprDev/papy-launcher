@@ -1,5 +1,6 @@
 package com.papy.launcher
 
+import com.papy.launcher.ui.theme.PapyBlue
 import android.Manifest
 import android.content.Intent
 import android.net.Uri
@@ -79,7 +80,7 @@ fun AdminScreen(
             text = "Administration",
             fontSize = 32.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF1A237E)
+            color = PapyBlue
         )
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -115,11 +116,9 @@ fun AdminScreen(
             onKioskToggle = {
                 if (it) {
                     Prefs.setKioskEnabled(context, true)
-                    PapyKioskService.enabled = true
                     kioskEnabled = true
                 } else {
                     Prefs.setKioskEnabled(context, false)
-                    PapyKioskService.enabled = false
                     kioskEnabled = false
                 }
             }

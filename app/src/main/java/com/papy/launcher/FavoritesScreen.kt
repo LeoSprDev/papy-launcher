@@ -1,7 +1,7 @@
 package com.papy.launcher
 
 import android.Manifest
-import android.content.Context
+
 import android.content.pm.PackageManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -42,6 +42,10 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.papy.launcher.ui.components.ScreenHeader
+import com.papy.launcher.ui.theme.PapyTextGray
+import com.papy.launcher.ui.theme.PapyTextDark
+import com.papy.launcher.ui.theme.PapySurfaceLight
+import com.papy.launcher.ui.theme.PapySurfaceMuted
 
 @Composable
 fun FavoritesScreen(
@@ -81,7 +85,7 @@ fun FavoritesScreen(
                     else
                         "Aucun favori. Ajoutez-en depuis l'administration.",
                     fontSize = 20.sp,
-                    color = Color(0xFF666666),
+                    color = PapyTextGray,
                     textAlign = TextAlign.Center
                 )
             }
@@ -93,7 +97,20 @@ fun FavoritesScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(contacts) { contact ->
-                    FavoriteTile(contact = contact, context = context)
+                    FavoriteTile(contact = contact) {
+                        val number = contact.phoneNumber
+                        if (number != null && ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE)
+                            == PackageManager.PERMISSION_GRANTED
+                        ) {
+                            performCall(context, number)
+                        } else {
+                            android.widget.Toast.makeText(
+                                context,
+                                "Autorisez les appels téléphoniques dans l'administration",
+                                android.widget.Toast.LENGTH_LONG
+                            ).show()
+                        }
+                    }
                 }
             }
         }
@@ -101,27 +118,15 @@ fun FavoritesScreen(
 }
 
 @Composable
-fun FavoriteTile(contact: Contact, context: Context) {
+fun FavoriteTile(contact: Contact, onClick: () -> Unit) {
     val hasNumber = !contact.phoneNumber.isNullOrEmpty()
+    val localContext = LocalContext.current
     val modifier = if (hasNumber) {
-        Modifier.clickable {
-            val number = contact.phoneNumber!!
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE)
-                == PackageManager.PERMISSION_GRANTED
-            ) {
-                performCall(context, number)
-            } else {
-                android.widget.Toast.makeText(
-                    context,
-                    "Autorisez les appels téléphoniques dans l'administration",
-                    android.widget.Toast.LENGTH_LONG
-                ).show()
-            }
-        }
+        Modifier.clickable(onClick = onClick)
     } else {
         Modifier.alpha(0.5f).clickable {
             android.widget.Toast.makeText(
-                context,
+                localContext,
                 "Aucun numéro pour ce contact",
                 android.widget.Toast.LENGTH_SHORT
             ).show()
@@ -132,7 +137,7 @@ fun FavoriteTile(contact: Contact, context: Context) {
         modifier = Modifier
             .aspectRatio(1f)
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFFF5F5F5))
+            .background(PapySurfaceLight)
             .then(modifier)
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -142,7 +147,7 @@ fun FavoriteTile(contact: Contact, context: Context) {
             modifier = Modifier
                 .size(96.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFEEEEEE)),
+                .background(PapySurfaceMuted),
             contentAlignment = Alignment.Center
         ) {
             if (contact.photoUri != null) {
@@ -163,7 +168,7 @@ fun FavoriteTile(contact: Contact, context: Context) {
                     text = initials,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF333333)
+                    color = PapyTextDark
                 )
             }
         }
@@ -172,7 +177,7 @@ fun FavoriteTile(contact: Contact, context: Context) {
             text = contact.displayName,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF333333),
+            color = PapyTextDark,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Center

@@ -1,6 +1,8 @@
 package com.papy.launcher
 
 import com.papy.launcher.ui.components.ScreenHeader
+import com.papy.launcher.ui.theme.PapyTextDark
+import com.papy.launcher.ui.theme.PapySurfaceLight
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -21,7 +23,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,6 +37,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 data class AppInfo(
     val packageName: String,
@@ -61,7 +69,10 @@ fun AppListScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
-    val apps = remember { loadInstalledApps(context) }
+    var apps by remember { mutableStateOf<List<AppInfo>>(emptyList()) }
+    LaunchedEffect(Unit) {
+        apps = withContext(Dispatchers.Default) { loadInstalledApps(context) }
+    }
 
     Column(
         modifier = Modifier
@@ -88,7 +99,7 @@ fun AppRow(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFFF5F5F5))
+            .background(PapySurfaceLight)
             .clickable(onClick = onClick)
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -99,7 +110,7 @@ fun AppRow(
             text = app.label,
             fontSize = 20.sp,
             fontWeight = FontWeight.Medium,
-            color = Color(0xFF333333)
+            color = PapyTextDark
         )
     }
 }

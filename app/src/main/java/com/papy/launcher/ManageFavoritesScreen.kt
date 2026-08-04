@@ -1,6 +1,12 @@
 package com.papy.launcher
 
 import com.papy.launcher.ui.components.ScreenHeader
+import com.papy.launcher.ui.theme.PapyRed
+import com.papy.launcher.ui.theme.PapyTextDark
+import com.papy.launcher.ui.theme.PapyTextGray
+import com.papy.launcher.ui.theme.PapyTextLight
+import com.papy.launcher.ui.theme.PapySurfaceLight
+import com.papy.launcher.ui.theme.PapySurfaceMuted
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -40,6 +46,8 @@ import android.content.Intent
 import android.provider.ContactsContract
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.DisposableEffect
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -116,7 +124,7 @@ fun ManageFavoritesScreen(
             Text(
                 text = "Autorisez d'abord les contacts dans l'administration (section Permissions).",
                 fontSize = 18.sp,
-                color = Color(0xFFC62828),
+                color = PapyRed,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
         }
@@ -134,18 +142,21 @@ fun ManageFavoritesScreen(
             Text(
                 text = "Aucun favori. Touchez « Ajouter un favori ».",
                 fontSize = 18.sp,
-                color = Color(0xFF666666)
+                color = PapyTextGray
             )
         } else {
-            val resolvedFavorites = remember(favorites) {
-                favorites.mapNotNull { getContactByLookupKey(context, it) }
+            var resolvedFavorites by remember { mutableStateOf<List<Contact>>(emptyList()) }
+            LaunchedEffect(favorites) {
+                resolvedFavorites = withContext(Dispatchers.IO) {
+                    favorites.mapNotNull { getContactByLookupKey(context, it) }
+                }
             }
             for (contact in resolvedFavorites) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFFF5F5F5))
+                        .background(PapySurfaceLight)
                         .padding(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -153,7 +164,7 @@ fun ManageFavoritesScreen(
                         modifier = Modifier
                             .size(40.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFEEEEEE)),
+                            .background(PapySurfaceMuted),
                         contentAlignment = Alignment.Center
                     ) {
                         if (contact.photoUri != null) {
@@ -174,7 +185,7 @@ fun ManageFavoritesScreen(
                                 text = initials,
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF333333)
+                                color = PapyTextDark
                             )
                         }
                     }
@@ -184,19 +195,19 @@ fun ManageFavoritesScreen(
                             text = contact.displayName,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF333333)
+                            color = PapyTextDark
                         )
                         if (!contact.phoneNumber.isNullOrEmpty()) {
                             Text(
                                 text = contact.phoneNumber,
                                 fontSize = 16.sp,
-                                color = Color(0xFF666666)
+                                color = PapyTextGray
                             )
                         } else {
                             Text(
                                 text = "Aucun numéro",
                                 fontSize = 16.sp,
-                                color = Color(0xFF888888)
+                                color = PapyTextLight
                             )
                         }
                     }
@@ -204,7 +215,7 @@ fun ManageFavoritesScreen(
                         text = "Retirer",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFFC62828),
+                        color = PapyRed,
                         modifier = Modifier.clickable {
                             Prefs.removeFavorite(context, contact.lookupKey)
                             favorites = Prefs.getFavorites(context)

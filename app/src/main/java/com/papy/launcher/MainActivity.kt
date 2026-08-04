@@ -83,7 +83,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.papy.launcher.ui.theme.PapyBlue
+import com.papy.launcher.ui.theme.PapyGreen
 import com.papy.launcher.ui.theme.PapyLauncherTheme
+import com.papy.launcher.ui.theme.PapyOrange
+import com.papy.launcher.ui.theme.PapyRed
+import com.papy.launcher.ui.theme.PapyTextBlueGray
+import com.papy.launcher.ui.theme.PapyTextDark
+import com.papy.launcher.ui.theme.PapyTextLight
 
 sealed class HomeTile {
     data class Fixed(val shortcut: Shortcut) : HomeTile()
@@ -92,6 +99,7 @@ sealed class HomeTile {
 
 class MainActivity : ComponentActivity() {
     private var pendingSosNumber: String? = null
+    private var sosPermissionPending = false
 
     private val callPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -102,6 +110,7 @@ class MainActivity : ComponentActivity() {
             Toast.makeText(this, "Permission d'appel refusée", Toast.LENGTH_SHORT).show()
         }
         pendingSosNumber = null
+        sosPermissionPending = false
     }
 
     private val multiPermissionLauncher = registerForActivityResult(
@@ -113,7 +122,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestEssentialPermissions()
-        PapyKioskService.enabled = Prefs.isKioskEnabled(this) && PapyKioskService.isRunning(this)
         hideSystemBars()
         setContent {
             PapyLauncherTheme {
@@ -239,7 +247,9 @@ class MainActivity : ComponentActivity() {
         ) {
             performCall(this, number)
         } else {
+            if (sosPermissionPending) return
             pendingSosNumber = number
+            sosPermissionPending = true
             callPermissionLauncher.launch(Manifest.permission.CALL_PHONE)
         }
     }
@@ -351,7 +361,7 @@ fun HomeScreen(
                             }
                             BigButton(
                                 label = appLabel,
-                                color = Color(0xFF546E7A),
+                                color = PapyTextBlueGray,
                                 drawableIcon = appIcon,
                                 badge = 0
                             ) {
@@ -373,7 +383,7 @@ fun HomeScreen(
         if (Prefs.isSosVisible(context)) {
             BigSosButton(
                 label = stringResource(R.string.btn_sos),
-                color = Color(0xFFC62828)
+                color = PapyRed
             ) {
                 val number = Prefs.getSosNumber(context)
                 (context as? MainActivity)?.requestSosCall(number)
@@ -427,18 +437,18 @@ fun ClockHeader(modifier: Modifier = Modifier) {
                 text = "Papy Launcher",
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Normal,
-                color = Color(0xFF888888)
+                color = PapyTextLight
             )
             Text(
                 text = timeStr,
                 fontSize = 48.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1A237E)
+                color = PapyBlue
             )
             Text(
                 text = dateStr.replaceFirstChar { it.uppercase() },
                 fontSize = 22.sp,
-                color = Color(0xFF333333),
+                color = PapyTextDark,
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
@@ -448,9 +458,9 @@ fun ClockHeader(modifier: Modifier = Modifier) {
 @Composable
 fun BatteryIndicator(level: Int, isCharging: Boolean, modifier: Modifier = Modifier) {
     val batteryColor = when {
-        level <= 15 -> Color(0xFFC62828)
-        level <= 30 -> Color(0xFFEF6C00)
-        else -> Color(0xFF2E7D32)
+        level <= 15 -> PapyRed
+        level <= 30 -> PapyOrange
+        else -> PapyGreen
     }
     val batteryIcon = when {
         level >= 90 -> Icons.Filled.BatteryFull
@@ -558,7 +568,7 @@ fun Badge(
             .padding(8.dp)
             .size(32.dp)
             .clip(CircleShape)
-            .background(Color(0xFFC62828))
+            .background(PapyRed)
             .border(2.dp, Color.White, CircleShape),
         contentAlignment = Alignment.Center
     ) {
