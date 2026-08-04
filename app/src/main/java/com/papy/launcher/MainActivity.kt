@@ -194,41 +194,41 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun AppNavigation() {
-        var screen by remember { mutableStateOf("home") }
+        var screen by remember { mutableStateOf<Screen>(Screen.Home) }
         when (screen) {
-            "home" -> HomeScreen(
-                onAdminTrigger = { screen = "pin" },
-                onApplis = { screen = "applist" },
-                onPhotos = { screen = "photos" },
-                onFavorites = { screen = "favorites" }
+            Screen.Home -> HomeScreen(
+                onAdminTrigger = { screen = Screen.Pin },
+                onApplis = { screen = Screen.AppList },
+                onPhotos = { screen = Screen.Photos },
+                onFavorites = { screen = Screen.Favorites }
             )
-            "pin" -> PinScreen(
-                onSuccess = { screen = "admin" },
-                onCancel = { screen = "home" }
+            Screen.Pin -> PinScreen(
+                onSuccess = { screen = Screen.Admin },
+                onCancel = { screen = Screen.Home }
             )
-            "admin" -> AdminScreen(
-                onExit = { screen = "home" },
-                onManageFavorites = { screen = "manage_favorites" },
-                onManageApps = { screen = "manage_apps" }
+            Screen.Admin -> AdminScreen(
+                onExit = { screen = Screen.Home },
+                onManageFavorites = { screen = Screen.ManageFavorites },
+                onManageApps = { screen = Screen.ManageApps }
             )
-            "manage_favorites" -> ManageFavoritesScreen(
-                onBack = { screen = "admin" }
+            Screen.ManageFavorites -> ManageFavoritesScreen(
+                onBack = { screen = Screen.Admin }
             )
-            "manage_apps" -> ManageAppsScreen(
-                onBack = { screen = "admin" },
-                onAddApp = { screen = "app_picker" }
+            Screen.ManageApps -> ManageAppsScreen(
+                onBack = { screen = Screen.Admin },
+                onAddApp = { screen = Screen.AppPicker }
             )
-            "app_picker" -> AppPickerScreen(
-                onBack = { screen = "manage_apps" }
+            Screen.AppPicker -> AppPickerScreen(
+                onBack = { screen = Screen.ManageApps }
             )
-            "applist" -> AppListScreen(
-                onBack = { screen = "home" }
+            Screen.AppList -> AppListScreen(
+                onBack = { screen = Screen.Home }
             )
-            "photos" -> PhotosScreen(
-                onBack = { screen = "home" }
+            Screen.Photos -> PhotosScreen(
+                onBack = { screen = Screen.Home }
             )
-            "favorites" -> FavoritesScreen(
-                onBack = { screen = "home" }
+            Screen.Favorites -> FavoritesScreen(
+                onBack = { screen = Screen.Home }
             )
         }
     }
