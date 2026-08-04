@@ -41,6 +41,18 @@ fun PinScreen(
     val context = androidx.compose.ui.platform.LocalContext.current
     val maxDigits = 4
 
+    fun trySubmit() {
+        if (enteredDigits.size == maxDigits) {
+            val pin = enteredDigits.joinToString("")
+            if (pin == Prefs.getPin(context)) {
+                onSuccess()
+            } else {
+                showError.value = true
+                enteredDigits.clear()
+            }
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -101,15 +113,7 @@ fun PinScreen(
                         if (enteredDigits.size < maxDigits) {
                             enteredDigits.add(digit)
                             showError.value = false
-                            if (enteredDigits.size == maxDigits) {
-                                val pin = enteredDigits.joinToString("")
-                                if (pin == Prefs.getPin(context)) {
-                                    onSuccess()
-                                } else {
-                                    showError.value = true
-                                    enteredDigits.clear()
-                                }
-                            }
+                            if (enteredDigits.size == maxDigits) trySubmit()
                         }
                     }
                 }
@@ -132,15 +136,7 @@ fun PinScreen(
                 if (enteredDigits.size < maxDigits) {
                     enteredDigits.add(0)
                     showError.value = false
-                    if (enteredDigits.size == maxDigits) {
-                        val pin = enteredDigits.joinToString("")
-                        if (pin == Prefs.getPin(context)) {
-                            onSuccess()
-                        } else {
-                            showError.value = true
-                            enteredDigits.clear()
-                        }
-                    }
+                    if (enteredDigits.size == maxDigits) trySubmit()
                 }
             }
             PinKey("X") {
