@@ -4,7 +4,6 @@ import com.papy.launcher.ui.components.ScreenHeader
 import com.papy.launcher.ui.theme.PapyTextDark
 import com.papy.launcher.ui.theme.PapySurfaceLight
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.widget.ImageView
@@ -126,12 +125,4 @@ fun AppIcon(icon: Drawable, size: Int) {
         },
         modifier = Modifier.size(size.dp)
     )
-}
-
-fun launchApp(context: Context, packageName: String) {
-    val intent = context.packageManager.getLaunchIntentForPackage(packageName)
-    if (intent != null) {
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        context.startActivity(intent)
-    }
 }

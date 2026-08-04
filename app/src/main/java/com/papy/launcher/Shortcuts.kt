@@ -1,6 +1,18 @@
 package com.papy.launcher
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Photo
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.SentimentVerySatisfied
+import androidx.compose.material.icons.filled.Sms
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class ShortcutId {
     APPELS, SMS, WHATSAPP, MAIL, PHOTOS, APPLIS, APPAREIL_PHOTO, PROUT, FAVORIS
@@ -29,3 +41,17 @@ object Shortcuts {
     fun byId(id: ShortcutId): Shortcut =
         all.first { it.id == id }
 }
+
+@Composable
+fun shortcutIcon(id: ShortcutId): ImageVector? =
+    when (id) {
+        ShortcutId.APPELS -> Icons.Filled.Phone
+        ShortcutId.SMS -> Icons.Filled.Sms
+        ShortcutId.WHATSAPP -> Icons.Filled.Chat
+        ShortcutId.MAIL -> Icons.Filled.Email
+        ShortcutId.PHOTOS -> Icons.Filled.Photo
+        ShortcutId.APPLIS -> Icons.Filled.Apps
+        ShortcutId.APPAREIL_PHOTO -> Icons.Filled.PhotoCamera
+        ShortcutId.PROUT -> Icons.Filled.SentimentVerySatisfied
+        ShortcutId.FAVORIS -> Icons.Filled.Star
+    }

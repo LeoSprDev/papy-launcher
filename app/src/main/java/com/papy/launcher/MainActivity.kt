@@ -1,16 +1,12 @@
 package com.papy.launcher
 
 import android.Manifest
-import android.app.Activity
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
 import android.provider.Settings
 import android.view.WindowManager
 import android.widget.Toast
@@ -36,42 +32,27 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Apps
-import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Photo
-import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.SentimentVerySatisfied
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.BatteryFull
-import androidx.compose.material.icons.filled.BatteryChargingFull
-import androidx.compose.material.icons.filled.Battery5Bar
-import androidx.compose.material.icons.filled.Battery4Bar
-import androidx.compose.material.icons.filled.Battery3Bar
-import androidx.compose.material.icons.filled.Battery2Bar
-import androidx.compose.material.icons.filled.Battery1Bar
 import androidx.compose.material.icons.filled.Battery0Bar
-import androidx.compose.material.icons.filled.Sms
+import androidx.compose.material.icons.filled.Battery1Bar
+import androidx.compose.material.icons.filled.Battery2Bar
+import androidx.compose.material.icons.filled.Battery3Bar
+import androidx.compose.material.icons.filled.Battery4Bar
+import androidx.compose.material.icons.filled.Battery5Bar
+import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.LaunchedEffect
-import kotlinx.coroutines.delay
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -91,11 +72,10 @@ import com.papy.launcher.ui.theme.PapyRed
 import com.papy.launcher.ui.theme.PapyTextBlueGray
 import com.papy.launcher.ui.theme.PapyTextDark
 import com.papy.launcher.ui.theme.PapyTextLight
-
-sealed class HomeTile {
-    data class Fixed(val shortcut: Shortcut) : HomeTile()
-    data class Dynamic(val app: DynamicApp) : HomeTile()
-}
+import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     private var pendingSosNumber: String? = null
@@ -614,81 +594,3 @@ fun BigSosButton(
         )
     }
 }
-
-fun launchDialer(context: Context) {
-    val intent = Intent(Intent.ACTION_DIAL).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-    }
-    safeStartActivity(context, intent)
-}
-
-fun launchSmsApp(context: Context) {
-    val intent = Intent(Intent.ACTION_MAIN).apply {
-        addCategory(Intent.CATEGORY_APP_MESSAGING)
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-    }
-    safeStartActivity(context, intent)
-}
-
-fun launchWhatsApp(context: Context) {
-    val intent = context.packageManager.getLaunchIntentForPackage("com.whatsapp")
-    if (intent != null) {
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        context.startActivity(intent)
-    } else {
-        Toast.makeText(context, "WhatsApp non installé", Toast.LENGTH_SHORT).show()
-    }
-}
-
-fun launchMailApp(context: Context) {
-    val intent = Intent(Intent.ACTION_MAIN).apply {
-        addCategory(Intent.CATEGORY_APP_EMAIL)
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-    }
-    safeStartActivity(context, intent)
-}
-
-fun launchSos(context: Context) {
-    val number = context.getString(R.string.sos_default_number)
-    (context as? MainActivity)?.requestSosCall(number)
-}
-
-fun performCall(context: Context, number: String) {
-    val intent = Intent(Intent.ACTION_CALL, Uri.parse("tel:$number")).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-    }
-    safeStartActivity(context, intent)
-}
-
-fun launchCamera(context: Context) {
-    val intent = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-        Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA)
-    } else {
-        Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-    }.apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK
-    }
-    safeStartActivity(context, intent)
-}
-
-fun safeStartActivity(context: Context, intent: Intent) {
-    try {
-        context.startActivity(intent)
-    } catch (e: ActivityNotFoundException) {
-        Toast.makeText(context, "Aucune application trouvée", Toast.LENGTH_SHORT).show()
-    }
-}
-
-@Composable
-fun shortcutIcon(id: ShortcutId): androidx.compose.ui.graphics.vector.ImageVector? =
-    when (id) {
-        ShortcutId.APPELS -> Icons.Filled.Phone
-        ShortcutId.SMS -> Icons.Filled.Sms
-        ShortcutId.WHATSAPP -> Icons.Filled.Chat
-        ShortcutId.MAIL -> Icons.Filled.Email
-        ShortcutId.PHOTOS -> Icons.Filled.Photo
-        ShortcutId.APPLIS -> Icons.Filled.Apps
-        ShortcutId.APPAREIL_PHOTO -> Icons.Filled.PhotoCamera
-        ShortcutId.PROUT -> Icons.Filled.SentimentVerySatisfied
-        ShortcutId.FAVORIS -> Icons.Filled.Star
-    }
